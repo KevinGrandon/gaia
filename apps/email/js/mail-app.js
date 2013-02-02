@@ -62,6 +62,47 @@ var App = {
           return;
         callback();
       }
+    },
+
+    /**
+     * Fires a callback when we think we are relatively idle
+     * Idle is defined as a period of 1s without paints
+     */
+    onIdle: function(callback) {
+      var lastPaint = Date.now();
+      function onPaint() {
+        lastPaint = Date.now();
+      }
+      window.addEventListener("MozAfterPaint", onPaint);
+
+      (function addTimeout() {
+        setTimeout(function(){
+          if (Date.now()-lastPaint < 1000) {
+            addTimeout();
+            return;
+          }
+          window.removeEventListener("MozAfterPaint", onPaint);
+          callback();
+        }, 1000);
+      })();
+    },
+
+    /**
+     * Preloads all remaining resources
+     */
+    preloadAll: function(cb) {
+      cb = cb || function() {};
+
+      App.loader.load(
+        'style/value_selector.css',
+        'style/compose-cards.css',
+        'style/setup-cards.css',
+        'js/value_selector.js',
+        'js/iframe-shims.js',
+        'js/setup-cards.js',
+        'js/compose-cards.js',
+        cb
+      );
     }
   },
 
@@ -177,6 +218,7 @@ var App = {
             allowBack: false
           });
       }
+      App.loader.onIdle(App.loader.preloadAll);
     };
   }
 };

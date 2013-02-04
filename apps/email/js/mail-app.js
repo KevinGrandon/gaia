@@ -83,6 +83,8 @@ var App = {
     }
   },
 
+  Template: EmailTemplate,
+  
   /**
    * Bind any global notifications, relay localizations to the back-end.
    */
@@ -252,7 +254,6 @@ function hookStartup() {
       gotMailAPI = false;
   function doInit() {
     try {
-      populateTemplateNodes();
       Cards._init();
       App._init();
       App.showMessageViewOrSetup();

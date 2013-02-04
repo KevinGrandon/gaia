@@ -558,7 +558,7 @@ SettingsMainCard.prototype = {
         self = this;
     addedItems.forEach(function(account) {
       var accountNode = account.element =
-        tngNodes['account-item'].cloneNode(true);
+        App.Template.get('tng', 'account-item').cloneNode(true);
       accountNode.account = account;
       self.updateAccountDom(account, true);
       accountsContainer.insertBefore(accountNode, insertBuddy);
@@ -659,7 +659,7 @@ function SettingsAccountCard(domNode, mode, args) {
     'change', this.onChangeSynchronize.bind(this), false);
 
   this.account.servers.forEach(function(server, index) {
-    var serverNode = tngNodes['account-settings-server'].cloneNode(true);
+    var serverNode = App.Template.get('fld', 'account-settings-server').cloneNode(true);
     var serverLabel =
       serverNode.getElementsByClassName('tng-account-server-label')[0];
 

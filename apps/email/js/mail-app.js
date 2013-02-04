@@ -8,6 +8,104 @@ var MailAPI = null;
 var App = {
   initialized: false,
 
+  loader: {
+    _loaded: {},
+
+    js: function(file, cb) {
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = file;
+      if (cb) script.onload = cb;
+      document.querySelector('head').appendChild(script);
+    },
+
+    style: function(file, cb) {
+      var script = document.createElement('link');
+      script.type = 'text/css';
+      script.rel = 'stylesheet';
+      script.href = file;
+      document.querySelector('head').appendChild(script);
+      cb();
+    },
+
+    /**
+     * Loads all resources passed to it
+     * Calls the callback when all resources are loaded
+     * The DOM injection is handled by one of the methods in this object.
+     * This is determined by the first resource segment, E.g., js/, style/...
+     */
+    load: function() {
+      var self = this;
+      var ops = arguments.length-1;
+      var callback = arguments[arguments.length-1];
+
+      function loadedCallback(resource) {
+        return function() {
+          self._loaded[resource] = true;
+          ops--;
+          done();
+        }
+      }
+
+      for (var i = 0; i < arguments.length-1;  i++) {
+        var resource = arguments[i];
+        if (!this._loaded[resource]) {
+          this[resource.split('/')[0]](resource, loadedCallback(resource));
+        } else {
+          ops--;
+          done();
+        }
+      }
+
+      function done() {
+        if (ops > 0)
+          return;
+        callback();
+      }
+    },
+
+    /**
+     * Fires a callback when we think we are relatively idle
+     * Idle is defined as a period of 1s without paints
+     */
+    onIdle: function(callback) {
+      var lastPaint = Date.now();
+      function onPaint() {
+        lastPaint = Date.now();
+      }
+      window.addEventListener("MozAfterPaint", onPaint);
+
+      (function addTimeout() {
+        setTimeout(function(){
+          if (Date.now()-lastPaint < 1000) {
+            addTimeout();
+            return;
+          }
+          window.removeEventListener("MozAfterPaint", onPaint);
+          callback();
+        }, 1000);
+      })();
+    },
+
+    /**
+     * Preloads all remaining resources
+     */
+    preloadAll: function(cb) {
+      cb = cb || function() {};
+
+      App.loader.load(
+        'style/value_selector.css',
+        'style/compose-cards.css',
+        'style/setup-cards.css',
+        'js/value_selector.js',
+        'js/iframe-shims.js',
+        'js/setup-cards.js',
+        'js/compose-cards.js',
+        cb
+      );
+    }
+  },
+
   /**
    * Bind any global notifications, relay localizations to the back-end.
    */
@@ -120,6 +218,7 @@ var App = {
             allowBack: false
           });
       }
+      App.loader.onIdle(App.loader.preloadAll);
     };
   }
 };

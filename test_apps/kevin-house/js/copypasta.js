@@ -66,10 +66,19 @@
       this.controlsShown = true;
 
       var target = this.startE.target;
+
       if (target instanceof HTMLInputElement) {
         target.select();
+        var sel = window.getSelection();
+        var newRange = document.createRange();
+        newRange.selectNode(target);
+        sel.addRange(newRange);
       } else if (target instanceof HTMLTextAreaElement) {
         target.select();
+        var sel = window.getSelection();
+        var newRange = document.createRange();
+        newRange.selectNode(target);
+        sel.addRange(newRange);
       } else {
         window.getSelection().selectAllChildren(target);
       }
@@ -90,9 +99,11 @@
       this.optionsEl.id = 'clipboard-menu';
       var actions = [
         '<li data-action="cut">Cut</li>',
-        '<li data-action="copy">Copy</li>',
-        '<li data-action="paste">Paste</li>'
+        '<li data-action="copy">Copy</li>'
       ];
+      if (this.clipboard) {
+        actions.push('<li data-action="paste">Paste</li>');
+      }
       this.optionsEl.innerHTML = actions.join('');
 
       this.optionsEl.addEventListener(this.START, this)
@@ -143,6 +154,10 @@
      */
     teardown: function() {
 
+      if (!this.controlsShown) {
+        return;
+      }
+
       clearTimeout(this.interactTimeout);
 
       if (this.leftKnob) {
@@ -157,7 +172,7 @@
 
       this.controlsShown = false;
 
-      this.optionsEl.parentNode.removeChild(this.optionsEl);
+      document.body.removeChild(this.optionsEl);
     },
 
     /**

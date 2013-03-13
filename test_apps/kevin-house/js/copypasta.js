@@ -222,20 +222,20 @@
       var lastPosition = {};
       while (true) {
 
-        var thisPosition = this.rangeHelper.outerRect();
+        var thisPosition = this.rangeHelper.bottomRect();
 
         // Break if we meet the word, or did not move on this iteration
-        if (thisPosition.top == lastPosition.top &&
-          thisPosition.left == lastPosition.left) {
+        if (thisPosition.bottom == lastPosition.bottom &&
+          thisPosition.right == lastPosition.right) {
           break;
         } 
         if ( direction == 'right' &&
-          thisPosition.top > xy.y &&
-          thisPosition.left > xy.x) {
+          thisPosition.bottom > xy.y &&
+          thisPosition.right > xy.x) {
           break;
         } else if ( direction == 'left' &&
-          thisPosition.top < xy.y &&
-          thisPosition.left < xy.x) {
+          thisPosition.bottom < xy.y &&
+          thisPosition.right < xy.x) {
           break;
         }
 
@@ -253,7 +253,7 @@
     leftKnobHandler: function(xy, el) {
       var direction;
 
-      var thisPosition = this.rangeHelper.topmostRect();
+      var thisPosition = this.rangeHelper.topRect();
 
       if (xy.y < thisPosition.top ||
           xy.x < thisPosition.left) {
@@ -266,7 +266,7 @@
 
       while (true) {
 
-        thisPosition = this.rangeHelper.topmostRect();
+        thisPosition = this.rangeHelper.topRect();
         // Break if we meet the word, or did not move on this iteration
         if ( direction == 'right' && (
           thisPosition.top > xy.y &&
@@ -358,7 +358,7 @@
     /**
      * Returns the topmost rectangle that makes up the selection
      */
-    topmostRect: function() {
+    topRect: function() {
       var range = this.sel.getRangeAt(0);
       var rects = range.getClientRects();
 
@@ -378,7 +378,33 @@
         left: topmost.left + window.pageXOffset
       };
 
-      return topmost;
+      return rangePosition;
+    },
+
+    /**
+     * Returns the bottom rectangle that makes up the selection
+     */
+    bottomRect: function() {
+      var range = this.sel.getRangeAt(0);
+      var rects = range.getClientRects();
+
+      var bottom;
+      for (var i = 0, rect; rect = rects[i]; i++) {
+        if (!bottom || rect.bottom > bottom.bottom) {
+          bottom = rect;
+        }
+      }
+
+      if (!bottom) {
+        return {};
+      }
+
+      var rangePosition = {
+        bottom: bottom.bottom + window.pageYOffset,
+        right: bottom.right + window.pageXOffset
+      };
+
+      return rangePosition;
     },
 
      /**

@@ -1,0 +1,19 @@
+{
+  "name": "CopyPasta!",
+  "description": "I like copy pasta.",
+  "launch_path": "/index.html",
+  "developer": {
+    "name": "CopyPaster",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "locales": {
+    "en-US": {
+      "name": "Template",
+      "description": "Web app template"
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "128": "/style/icons/Blank.png"
+  }
+}

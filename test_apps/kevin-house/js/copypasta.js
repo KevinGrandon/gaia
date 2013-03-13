@@ -66,7 +66,13 @@
       this.controlsShown = true;
 
       var target = this.startE.target;
-      window.getSelection().selectAllChildren(target);
+      if (target instanceof HTMLInputElement) {
+        target.select();
+      } else if (target instanceof HTMLTextAreaElement) {
+        target.select();
+      } else {
+        window.getSelection().selectAllChildren(target);
+      }
 
       // Get the region of the selection
       var targetArea = target.getBoundingClientRect();

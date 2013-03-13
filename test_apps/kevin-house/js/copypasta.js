@@ -47,8 +47,7 @@
       if ( !this.controlsShown && (
           Math.abs(this.startXY.x - xy.x) > this.TOUCH_BOUND ||
           Math.abs(this.startXY.y - xy.y) > this.TOUCH_BOUND) ) {
-        clearTimeout(this.interactTimeout);
-        this.controlsShown = false;
+        this.teardown();
       }
 
       //dump('Got move!' + xy.x + ' - ' + xy.y)
@@ -60,8 +59,7 @@
         return;
       }
 
-      this.controlsShown = false;
-      clearTimeout(this.interactTimeout);
+      this.teardown();
     },
 
     showControls: function() {
@@ -81,21 +79,79 @@
 
       this.createKnob('left', leftKnobPos);
       this.createKnob('right', rightKnobPos);
+
+      this.optionsEl = document.createElement('ul');
+      this.optionsEl.id = 'clipboard-menu';
+      var actions = [
+        '<li data-action="cut">Cut</li>',
+        '<li data-action="copy">Copy</li>',
+        '<li data-action="paste">Paste</li>'
+      ];
+      this.optionsEl.innerHTML = actions.join('');
+
+      this.optionsEl.addEventListener(this.START, this)
+
+      document.body.appendChild(this.optionsEl);
+      this.positionMenu();
+    },
+
+    positionMenu: function() {
+
+      var top = parseInt(this.leftKnob.style.top, 10);
+      var left = parseInt(this.leftKnob.style.left, 10);
+
+      this.optionsEl.style.top = top + 'px';
+      this.optionsEl.style.left = left + 'px';
+    },
+
+    /**
+     * Called when a user clicks on the menu
+     */
+    handleEvent: function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      var action = e.target.dataset.action;
+      if (!action) {
+        return;
+      }
+
+      var sel = window.getSelection();
+      if (action == 'copy') {
+        this.clipboard = sel.toString();
+      } else if (action == 'cut') {
+        this.clipboard = sel.toString();
+        range = sel.getRangeAt(0);
+        range.deleteContents();
+      } else if (action == 'paste') {
+        range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(this.clipboard));
+      }
+
+      this.teardown();
     },
 
     /**
      * Removes the Copy/Paste UI
      */
     teardown: function() {
+
+      clearTimeout(this.interactTimeout);
+
       if (this.leftKnob) {
         document.body.removeChild(this.leftKnob);
         delete this.leftKnob;
       }
+
       if (this.rightKnob) {
         document.body.removeChild(this.rightKnob);
         delete this.rightKnob;
       }
+
       this.controlsShown = false;
+
+      this.optionsEl.parentNode.removeChild(this.optionsEl);
     },
 
     /**
@@ -260,6 +316,8 @@
 
         el.style.left = xy.x + 'px';
         el.style.top = xy.y + 'px';
+
+        self.positionMenu();
       }
     }
   };

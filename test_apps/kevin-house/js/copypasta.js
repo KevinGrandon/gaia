@@ -4,6 +4,11 @@
    * Copy/Paste base class
    */
   function CopyPaste() {
+
+    this.rangeHelper = new RangeHelper();
+
+    this.clipboard = '';
+
     this.INTERACT_DELAY = 700;
     this.TOUCH_BOUND = 50;
 
@@ -72,7 +77,7 @@
         left: targetArea.left + window.pageXOffset
       };
 
-      var rightKnobPos = this.getSelectionPosition();
+      var rightKnobPos = this.rangeHelper.outerRect();
 
       this.createKnob('left', leftKnobPos);
       this.createKnob('right', rightKnobPos);
@@ -91,26 +96,6 @@
         delete this.rightKnob;
       }
       this.controlsShown = false;
-    },
-
-    /**
-     * Gets coordinates of selected text
-     * This returns the end of the selection
-     */
-    getSelectionPosition: function() {
-      var range = window.getSelection().getRangeAt(0).cloneRange();
-      range.collapse(false);
-      var dummy = document.createElement("span");
-      range.insertNode(dummy);
-
-      var rect = dummy.getBoundingClientRect();
-      var coords = {
-        top: rect.top + window.pageYOffset,
-        left: rect.left + window.pageXOffset
-      };
-      dummy.parentNode.removeChild(dummy);
-
-      return coords;
     },
 
     /**
@@ -160,7 +145,7 @@
       var lastPosition = {};
       while (true) {
 
-        var thisPosition = this.getSelectionPosition();
+        var thisPosition = this.rangeHelper.outerRect();
 
         // Break if we meet the word, or did not move on this iteration
         if (thisPosition.top == lastPosition.top &&
@@ -191,49 +176,28 @@
     leftKnobHandler: function(xy, el) {
       var direction;
 
-      function getRangePosition() {
-        var range = window.getSelection().getRangeAt(0);
-        var rects = range.getClientRects();
+      var thisPosition = this.rangeHelper.topmostRect();
 
-        var topmost;
-        for (var i = 0, rect; rect = rects[i]; i++) {
-          if (!topmost || rect.top < topmost.top) {
-            topmost = rect;
-          }
-        }
-
-        var rangePosition = {
-          x: topmost.left + window.pageXOffset,
-          y: topmost.top + window.pageYOffset
-        };
-
-        return rangePosition;
-      }
-
-      var thisPosition = getRangePosition();
-
-      if (xy.y < thisPosition.y ||
-          xy.x < thisPosition.x) {
+      if (xy.y < thisPosition.top ||
+          xy.x < thisPosition.left) {
         direction = 'left';
       } else {
         direction = 'right';
       }
 
-      var lastPosition = {};
       var modified = false;
 
       while (true) {
 
-        thisPosition = getRangePosition();
-
+        thisPosition = this.rangeHelper.topmostRect();
         // Break if we meet the word, or did not move on this iteration
         if ( direction == 'right' && (
-          thisPosition.y > xy.y &&
-          thisPosition.x > xy.x) ) {
+          thisPosition.top > xy.y &&
+          thisPosition.left > xy.x) ) {
           break;
         } else if ( direction == 'left' &&
-          thisPosition.y < xy.y &&
-          thisPosition.x < xy.x) {
+          thisPosition.top < xy.y &&
+          thisPosition.left < xy.x) {
           break;
         }
 
@@ -273,8 +237,6 @@
             break;
           }
         }
-
-        lastPosition = thisPosition;
       }
     },
 
@@ -299,6 +261,65 @@
         el.style.left = xy.x + 'px';
         el.style.top = xy.y + 'px';
       }
+    }
+  };
+
+  /**
+   * General range helper functions
+   */
+  function RangeHelper() {
+  }
+
+  RangeHelper.prototype = {
+
+    get sel() {
+      return window.getSelection();
+    },
+
+    /**
+     * Returns the topmost rectangle that makes up the selection
+     */
+    topmostRect: function() {
+      var range = this.sel.getRangeAt(0);
+      var rects = range.getClientRects();
+
+      var topmost;
+      for (var i = 0, rect; rect = rects[i]; i++) {
+        if (!topmost || rect.top < topmost.top) {
+          topmost = rect;
+        }
+      }
+
+      if (!topmost) {
+        return {};
+      }
+
+      var rangePosition = {
+        top: topmost.top + window.pageYOffset,
+        left: topmost.left + window.pageXOffset
+      };
+
+      return topmost;
+    },
+
+     /**
+     * Gets the outer rectangle coordinates of the selction
+     * Normalizes data to absolute values with window offsets.
+     */
+    outerRect: function() {
+      var range = this.sel.getRangeAt(0).cloneRange();
+      range.collapse(false);
+      var dummy = document.createElement("span");
+      range.insertNode(dummy);
+
+      var rect = dummy.getBoundingClientRect();
+      var coords = {
+        top: rect.top + window.pageYOffset,
+        left: rect.left + window.pageXOffset
+      };
+      dummy.parentNode.removeChild(dummy);
+
+      return coords;
     }
   };
 

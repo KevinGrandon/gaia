@@ -9,6 +9,9 @@
 
     this.clipboard = '';
 
+    this.MENU_ADJUST_TOP = -45;
+    this.MENU_ADJUST_LEFT = -10;
+
     this.INTERACT_DELAY = 700;
     this.TOUCH_BOUND = 50;
 
@@ -117,8 +120,8 @@
       var top = parseInt(this.leftKnob.style.top, 10);
       var left = parseInt(this.leftKnob.style.left, 10);
 
-      this.optionsEl.style.top = top + 'px';
-      this.optionsEl.style.left = left + 'px';
+      this.optionsEl.style.top = (top + this.MENU_ADJUST_TOP) + 'px';
+      this.optionsEl.style.left = (left + this.MENU_ADJUST_LEFT) + 'px';
     },
 
     /**

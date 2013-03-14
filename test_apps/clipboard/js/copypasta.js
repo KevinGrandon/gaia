@@ -128,17 +128,14 @@
       }
 
       var sel = window.getSelection();
-      if (action == 'copy') {
-        this.clipboard = sel.toString();
-      } else if (action == 'cut') {
-        this.clipboard = sel.toString();
-        range = sel.getRangeAt(0);
-        range.deleteContents();
-      } else if (action == 'paste') {
-        range = sel.getRangeAt(0);
-        range.deleteContents();
-        range.insertNode(document.createTextNode(this.clipboard));
-      }
+      this.strategy[action]({
+
+        value: this.clipboard,
+
+        modify: function(clipboard) {
+          this.clipboard = clipboard;
+        }.bind(this)
+      });
 
       this.teardown();
     },
@@ -322,6 +319,26 @@
 
   HtmlInputStrategy.prototype = {
 
+    copy: function(clipboard) {
+      var content = this.node.value.substring(
+        this.node.selectionStart,
+        this.node.selectionEnd
+      );
+
+      clipboard.modify(content);
+    },
+
+    cut: function(clipboard) {
+      this.copy(clipboard);
+      this.node.value = this.node.value
+        .substring(0, this.node.selectionStart - 1) +
+        this.node.value.substring(this.node.selectionEnd);
+    },
+
+    paste: function(clipboard) {
+      this.node.value = clipboard.value;
+    },
+
     /**
      * Creates the initial selection
      * This is currently the entire value of the input
@@ -494,6 +511,22 @@
 
     get sel() {
       return window.getSelection();
+    },
+
+    copy: function(modifyClipboard) {
+      modifyClipboard(sel.toString());
+    },
+
+    cut: function(modifyClipboard) {
+      modifyClipboard(sel.toString());
+      range = sel.getRangeAt(0);
+      range.deleteContents();
+    },
+
+    paste: function() {
+      range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(this.clipboard));
     },
 
     /**

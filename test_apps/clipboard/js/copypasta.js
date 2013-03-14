@@ -7,7 +7,7 @@
     this.clipboard = '';
 
     this.MENU_ADJUST_TOP = -45;
-    this.MENU_ADJUST_LEFT = -10;
+    this.MENU_ADJUST_LEFT = 20;
 
     this.INTERACT_DELAY = 700;
     this.TOUCH_BOUND = 50;
@@ -232,8 +232,11 @@
           break;
         }
 
-        var selection = window.getSelection();
-        selection.modify('extend', direction, modification);
+       if (direction == 'left') {
+          this.strategy.shrinkRight();
+        } else {
+          this.strategy.extendRight();
+        }
 
         lastPosition = thisPosition;
       }
@@ -280,38 +283,9 @@
         var offset = 0;
 
         if (direction == 'left') {
-
-            // Detect if selection is backwards
-            var sel = window.getSelection();
-            var range = document.createRange();
-            range.setStart(sel.anchorNode, sel.anchorOffset);
-            range.setEnd(sel.focusNode, sel.focusOffset);
-            var backwards = range.collapsed;
-            range.detach();
-
-            // modify() works on the focus of the selection
-            var endNode = sel.focusNode;
-            var endOffset = sel.focusOffset;
-            sel.collapse(sel.anchorNode, sel.anchorOffset);
-
-            var selDirection;
-            if (backwards) {
-                selDirection = 'forward';
-            } else {
-                selDirection = 'backward';
-            }
-
-            sel.modify("move", selDirection, "word");
-            sel.extend(endNode, endOffset);
+          this.strategy.extendLeft();
         } else {
-          var sel = window.getSelection();
-          var range = sel.getRangeAt(0);
-          try {
-            range.setStart(sel.anchorNode, sel.anchorOffset+1);
-          } catch(e) {
-            console.log('Couldn\'t get element')
-            break;
-          }
+          this.strategy.shrinkLeft();         
         }
 
         lastPosition = thisPosition;
@@ -465,6 +439,22 @@
      */
     bottomRect: function() {
       return this.getRegion();
+    },
+
+    shrinkRight: function() {
+
+    },
+
+    extendRight: function() {
+
+    },
+
+    shrinkLeft: function() {
+
+    },
+
+    extendLeft: function() {
+      
     }
   }
 
@@ -560,7 +550,48 @@
       dummy.parentNode.removeChild(dummy);
 
       return coords;
+    },
+
+    shrinkRight: function() {
+      this.sel.modify('extend', 'left', 'word');
+    },
+
+    extendRight: function() {
+      this.sel.modify('extend', 'right', 'word');
+    },
+
+    shrinkLeft: function() {
+      var sel = window.getSelection();
+      var range = sel.getRangeAt(0);
+
+      range.setStart(sel.anchorNode, sel.anchorOffset+1);
+    },
+
+    extendLeft: function() {
+      // Detect if selection is backwards
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.setStart(sel.anchorNode, sel.anchorOffset);
+      range.setEnd(sel.focusNode, sel.focusOffset);
+      var backwards = range.collapsed;
+      range.detach();
+
+      // modify() works on the focus of the selection
+      var endNode = sel.focusNode;
+      var endOffset = sel.focusOffset;
+      sel.collapse(sel.anchorNode, sel.anchorOffset);
+
+      var selDirection;
+      if (backwards) {
+          selDirection = 'forward';
+      } else {
+          selDirection = 'backward';
+      }
+
+      sel.modify("move", selDirection, "word");
+      sel.extend(endNode, endOffset);
     }
+
   };
 
   function MouseCopyPaste() {

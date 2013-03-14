@@ -4,9 +4,6 @@
    * Copy/Paste base class
    */
   function CopyPaste() {
-
-    this.rangeHelper = new RangeHelper();
-
     this.clipboard = '';
 
     this.MENU_ADJUST_TOP = -45;
@@ -71,20 +68,14 @@
       var target = this.startE.target;
 
       if (target instanceof HTMLInputElement) {
-        target.select();
-        var sel = window.getSelection();
-        var newRange = document.createRange();
-        newRange.selectNode(target);
-        sel.addRange(newRange);
+        this.strategy = new HtmlInputStrategy(target);
       } else if (target instanceof HTMLTextAreaElement) {
-        target.select();
-        var sel = window.getSelection();
-        var newRange = document.createRange();
-        newRange.selectNode(target);
-        sel.addRange(newRange);
+        this.strategy = new HtmlInputStrategy(target);
       } else {
-        window.getSelection().selectAllChildren(target);
+        this.strategy = new HtmlContentStrategy(target);
       }
+
+      this.strategy.initialSelection();
 
       // Get the region of the selection
       var targetArea = target.getBoundingClientRect();
@@ -93,7 +84,7 @@
         left: targetArea.left + window.pageXOffset
       };
 
-      var rightKnobPos = this.rangeHelper.outerRect();
+      var rightKnobPos = this.strategy.outerRect();
 
       this.createKnob('left', leftKnobPos);
       this.createKnob('right', rightKnobPos);
@@ -224,7 +215,7 @@
       var lastPosition = {};
       while (true) {
 
-        var thisPosition = this.rangeHelper.bottomRect();
+        var thisPosition = this.strategy.bottomRect();
 
         // Break if we meet the word, or did not move on this iteration
         if (thisPosition.bottom == lastPosition.bottom &&
@@ -255,7 +246,7 @@
     leftKnobHandler: function(xy, el) {
       var direction;
 
-      var thisPosition = this.rangeHelper.topRect();
+      var thisPosition = this.strategy.topRect();
 
       if (xy.y < thisPosition.top ||
           xy.x < thisPosition.left) {
@@ -264,12 +255,16 @@
         direction = 'right';
       }
 
-      var modified = false;
+      var lastPosition = {};
 
       while (true) {
 
-        thisPosition = this.rangeHelper.topRect();
+        thisPosition = this.strategy.topRect();
         // Break if we meet the word, or did not move on this iteration
+        if (thisPosition.top == lastPosition.top &&
+          thisPosition.left == lastPosition.left) {
+          break;
+        } 
         if ( direction == 'right' && (
           thisPosition.top > xy.y &&
           thisPosition.left > xy.x) ) {
@@ -285,6 +280,7 @@
         var offset = 0;
 
         if (direction == 'left') {
+
             // Detect if selection is backwards
             var sel = window.getSelection();
             var range = document.createRange();
@@ -294,7 +290,8 @@
             range.detach();
 
             // modify() works on the focus of the selection
-            var endNode = sel.focusNode, endOffset = sel.focusOffset;
+            var endNode = sel.focusNode;
+            var endOffset = sel.focusOffset;
             sel.collapse(sel.anchorNode, sel.anchorOffset);
 
             var selDirection;
@@ -316,6 +313,8 @@
             break;
           }
         }
+
+        lastPosition = thisPosition;
       }
     },
 
@@ -345,16 +344,33 @@
     }
   };
 
+  function HtmlInputStrategy(node) {
+    this.node = node;
+  }
+
+  HtmlInputStrategy.prototype = {
+    initialSelection: function() {
+      this.node.selectionStart = 0;
+      this.node.selectionEnd = this.node.value.length;
+    }
+  }
+
+
   /**
    * General range helper functions
    */
-  function RangeHelper() {
+  function HtmlContentStrategy(node) {
+    this.node = node;
   }
 
-  RangeHelper.prototype = {
+  HtmlContentStrategy.prototype = {
 
     get sel() {
       return window.getSelection();
+    },
+
+    initialSelection: function() {
+      window.getSelection().selectAllChildren(this.node);
     },
 
     /**

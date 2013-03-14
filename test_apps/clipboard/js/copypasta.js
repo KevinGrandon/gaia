@@ -1,4 +1,4 @@
-(function initCopyPaste(){
+(function initCopyPaste() {
 
   /**
    * Copy/Paste base class
@@ -25,7 +25,7 @@
     },
 
     onStart: function(e) {
-      dump('GOT TOUCH START' + e)
+      dump('GOT TOUCH START' + e);
 
       if (this.controlsShown) {
         this.teardown();
@@ -44,9 +44,9 @@
     onMove: function(e) {
       var xy = this.coords(e);
 
-      if ( !this.controlsShown && (
+      if (!this.controlsShown && (
           Math.abs(this.startXY.x - xy.x) > this.TOUCH_BOUND ||
-          Math.abs(this.startXY.y - xy.y) > this.TOUCH_BOUND) ) {
+          Math.abs(this.startXY.y - xy.y) > this.TOUCH_BOUND)) {
         this.teardown();
       }
 
@@ -100,7 +100,7 @@
       }
       this.optionsEl.innerHTML = actions.join('');
 
-      this.optionsEl.addEventListener(this.START, this)
+      this.optionsEl.addEventListener(this.START, this);
 
       document.body.appendChild(this.optionsEl);
       this.positionMenu();
@@ -172,7 +172,7 @@
      * Creates a left or right knob
      */
     createKnob: function(name, pos) {
-      var knob = name + 'Knob'
+      var knob = name + 'Knob';
       if (this[knob]) {
         this[knob].parentNode.removeChild(this[knob]);
       }
@@ -221,12 +221,12 @@
         if (thisPosition.bottom == lastPosition.bottom &&
           thisPosition.right == lastPosition.right) {
           break;
-        } 
-        if ( direction == 'right' &&
+        }
+        if (direction == 'right' &&
           thisPosition.bottom > xy.y &&
           thisPosition.right > xy.x) {
           break;
-        } else if ( direction == 'left' &&
+        } else if (direction == 'left' &&
           thisPosition.bottom < xy.y &&
           thisPosition.right < xy.x) {
           break;
@@ -267,12 +267,12 @@
         if (thisPosition.top == lastPosition.top &&
           thisPosition.left == lastPosition.left) {
           break;
-        } 
-        if ( direction == 'right' && (
+        }
+        if (direction == 'right' && (
           thisPosition.top > xy.y &&
-          thisPosition.left > xy.x) ) {
+          thisPosition.left > xy.x)) {
           break;
-        } else if ( direction == 'left' &&
+        } else if (direction == 'left' &&
           thisPosition.top < xy.y &&
           thisPosition.left < xy.x) {
           break;
@@ -285,7 +285,7 @@
         if (direction == 'left') {
           this.strategy.extendLeft();
         } else {
-          this.strategy.shrinkLeft();         
+          this.strategy.shrinkLeft();
         }
 
         lastPosition = thisPosition;
@@ -346,8 +346,11 @@
           height = getInputCSS('height', true);
 
           // Styles to simulate a node in an input field
-      var cssDefaultStyles = "white-space:pre;padding:0;margin:0;",
-          listOfModifiers = ['direction', 'font-family', 'font-size', 'font-size-adjust', 'font-variant', 'font-weight', 'font-style', 'letter-spacing', 'line-height', 'text-align', 'text-indent', 'text-transform', 'word-wrap', 'word-spacing'];
+      var cssDefaultStyles = 'white-space:pre;padding:0;margin:0;',
+          listOfModifiers = ['direction', 'font-family', 'font-size',
+          'font-size-adjust', 'font-variant', 'font-weight', 'font-style',
+          'letter-spacing', 'line-height', 'text-align', 'text-indent',
+          'text-transform', 'word-wrap', 'word-spacing'];
 
       topPos += getInputCSS('padding-top', true);
       topPos += getInputCSS('border-top-width', true);
@@ -355,65 +358,80 @@
       leftPos += getInputCSS('border-left-width', true);
       leftPos += 1; //Seems to be necessary
 
-      for (var i=0; i<listOfModifiers.length; i++) {
+      for (var i = 0; i < listOfModifiers.length; i++) {
           var property = listOfModifiers[i];
-          cssDefaultStyles += property + ':' + getInputCSS(property) +';';
+          cssDefaultStyles += property + ':' + getInputCSS(property) + ';';
       }
       // End of CSS variable checks
 
       var text = this.node.value,
           textLen = text.length,
-          fakeClone = document.createElement("div");
+          fakeClone = document.createElement('div');
 
-      if(this.node.selectionStart > 0) appendPart(0, this.node.selectionStart);
-      var fakeRange = appendPart(this.node.selectionStart, this.node.selectionEnd);
-      if(textLen > this.node.selectionEnd) appendPart(this.node.selectionEnd, textLen);
+      if (this.node.selectionStart > 0)
+        appendPart(0, this.node.selectionStart);
+
+      var fakeRange = appendPart(
+        this.node.selectionStart,
+        this.node.selectionEnd
+      );
+
+      if (textLen > this.node.selectionEnd)
+        appendPart(this.node.selectionEnd, textLen);
 
       // Styles to inherit the font styles of the element
       fakeClone.style.cssText = cssDefaultStyles;
 
       // Styles to position the text node at the desired position
-      fakeClone.style.position = "absolute";
-      fakeClone.style.top = topPos + "px";
-      fakeClone.style.left = leftPos + "px";
-      fakeClone.style.width = width + "px";
-      fakeClone.style.height = height + "px";
-      fakeClone.style.backgroundColor = "#FF0000";
+      fakeClone.style.position = 'absolute';
+      fakeClone.style.top = topPos + 'px';
+      fakeClone.style.left = leftPos + 'px';
+      fakeClone.style.width = width + 'px';
+      fakeClone.style.height = height + 'px';
+      fakeClone.style.backgroundColor = '#FF0000';
       document.body.appendChild(fakeClone);
       var returnValue = fakeRange.getBoundingClientRect();
 
       fakeClone.parentNode.removeChild(fakeClone); // Comment this to debug
 
-      function appendPart(start, end){
-        var span = document.createElement("span");
-        span.style.cssText = cssDefaultStyles; //Force styles to prevent unexpected results
+      function appendPart(start, end) {
+        var span = document.createElement('span');
+        //Force styles to prevent unexpected results
+        span.style.cssText = cssDefaultStyles;
         span.textContent = text.substring(start, end);
         fakeClone.appendChild(span);
         return span;
       }
 
       // Computing offset position
-      function getInputOffset(){
+      function getInputOffset() {
         var body = document.body,
             win = document.defaultView,
             docElem = document.documentElement,
             box = document.createElement('div');
-        box.style.paddingLeft = box.style.width = "1px";
+        box.style.paddingLeft = box.style.width = '1px';
         body.appendChild(box);
         var isBoxModel = box.offsetWidth == 2;
         body.removeChild(box);
         box = input.getBoundingClientRect();
-        var clientTop  = docElem.clientTop  || body.clientTop  || 0,
+        var clientTop = docElem.clientTop || body.clientTop || 0,
+
             clientLeft = docElem.clientLeft || body.clientLeft || 0,
-            scrollTop  = win.pageYOffset || isBoxModel && docElem.scrollTop  || body.scrollTop,
-            scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
+
+            scrollTop = win.pageYOffset || isBoxModel &&
+              docElem.scrollTop || body.scrollTop,
+
+            scrollLeft = win.pageXOffset || isBoxModel &&
+              docElem.scrollLeft || body.scrollLeft;
         return {
-            top : box.top  + scrollTop  - clientTop,
+            top: box.top + scrollTop - clientTop,
             left: box.left + scrollLeft - clientLeft};
       }
 
-      function getInputCSS(prop, isnumber){
-        var val = document.defaultView.getComputedStyle(input, null).getPropertyValue(prop);
+      function getInputCSS(prop, isnumber) {
+        var val = document.defaultView
+          .getComputedStyle(input, null).getPropertyValue(prop);
+
         return isnumber ? parseFloat(val) : val;
       }
 
@@ -454,9 +472,9 @@
     },
 
     extendLeft: function() {
-      
+
     }
-  }
+  };
 
 
   /**
@@ -539,7 +557,7 @@
     endPosition: function() {
       var range = this.sel.getRangeAt(0).cloneRange();
       range.collapse(false);
-      var dummy = document.createElement("span");
+      var dummy = document.createElement('span');
       range.insertNode(dummy);
 
       var rect = dummy.getBoundingClientRect();
@@ -564,7 +582,7 @@
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
 
-      range.setStart(sel.anchorNode, sel.anchorOffset+1);
+      range.setStart(sel.anchorNode, sel.anchorOffset + 1);
     },
 
     extendLeft: function() {
@@ -588,7 +606,7 @@
           selDirection = 'backward';
       }
 
-      sel.modify("move", selDirection, "word");
+      sel.modify('move', selDirection, 'word');
       sel.extend(endNode, endOffset);
     }
 
@@ -610,7 +628,7 @@
     coords: function(e) {
       return {
         x: e.pageX,
-        y: e.pageY,
+        y: e.pageY
       };
     }
   };
@@ -638,7 +656,7 @@
     }
   };
 
-  if ("ontouchstart" in window) {
+  if ('ontouchstart' in window) {
     var copyPaste = new TouchCopyPaste();
   } else {
     var copyPaste = new MouseCopyPaste();

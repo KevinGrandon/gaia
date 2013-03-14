@@ -84,7 +84,7 @@
         left: targetArea.left + window.pageXOffset
       };
 
-      var rightKnobPos = this.strategy.outerRect();
+      var rightKnobPos = this.strategy.endPosition();
 
       this.createKnob('left', leftKnobPos);
       this.createKnob('right', rightKnobPos);
@@ -349,9 +349,26 @@
   }
 
   HtmlInputStrategy.prototype = {
+
+    /**
+     * Creates the initial selection
+     * This is currently the entire value of the input
+     */
     initialSelection: function() {
       this.node.selectionStart = 0;
       this.node.selectionEnd = this.node.value.length;
+    },
+
+     /**
+     * Gets the outer rectangle coordinates of the selction
+     * Normalizes data to absolute values with window offsets.
+     */
+    endPosition: function() {
+      var region = this.node.getBoundingClientRect();
+      return {
+        top: region.bottom + window.pageYOffset,
+        left: region.right + window.pageXOffset
+      };
     }
   }
 
@@ -369,6 +386,10 @@
       return window.getSelection();
     },
 
+    /**
+     * Creates the initial selection
+     * This is currently the entire elemtn
+     */
     initialSelection: function() {
       window.getSelection().selectAllChildren(this.node);
     },
@@ -429,7 +450,7 @@
      * Gets the outer rectangle coordinates of the selction
      * Normalizes data to absolute values with window offsets.
      */
-    outerRect: function() {
+    endPosition: function() {
       var range = this.sel.getRangeAt(0).cloneRange();
       range.collapse(false);
       var dummy = document.createElement("span");

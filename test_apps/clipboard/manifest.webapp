@@ -1,15 +1,15 @@
 {
-  "name": "CopyPasta!",
-  "description": "I like copy pasta.",
+  "name": "Clipboard",
+  "description": "I like to copy & paste in FirefoxOS.",
   "launch_path": "/index.html",
   "developer": {
-    "name": "CopyPaster",
+    "name": "Clipboard",
     "url": "https://github.com/mozilla-b2g/gaia"
   },
   "locales": {
     "en-US": {
-      "name": "Template",
-      "description": "Web app template"
+      "name": "Clipboard",
+      "description": "I like to copy & paste in FirefoxOS."
     }
   },
   "default_locale": "en-US",

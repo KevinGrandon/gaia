@@ -154,10 +154,6 @@
      */
     teardown: function() {
 
-      if (!this.controlsShown) {
-        return;
-      }
-
       clearTimeout(this.interactTimeout);
 
       if (this.leftKnob) {
@@ -172,7 +168,10 @@
 
       this.controlsShown = false;
 
-      document.body.removeChild(this.optionsEl);
+      if (this.optionsEl) {
+        document.body.removeChild(this.optionsEl);
+        delete this.optionsEl;
+      }
     },
 
     /**
@@ -463,7 +462,7 @@
      * Extracts the X/Y positions for a touch event
      */
     coords: function(e) {
-      var touch = e.originalEvent.touches[0];
+      var touch = e.touches[0];
 
       return {
         x: touch.pageX,

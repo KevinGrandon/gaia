@@ -148,7 +148,9 @@
      */
     teardown: function() {
 
-      clearTimeout(this.interactTimeout);
+      if (this.interactTimeout) {
+        clearTimeout(this.interactTimeout);
+      }
 
       if (this.leftKnob) {
         document.body.removeChild(this.leftKnob);
@@ -277,10 +279,6 @@
           thisPosition.left < xy.x) {
           break;
         }
-
-        var range = window.getSelection().getRangeAt(0);
-        var previous;
-        var offset = 0;
 
         if (direction == 'left') {
           this.strategy.extendLeft();
@@ -459,20 +457,28 @@
       return this.getRegion();
     },
 
-    shrinkRight: function() {
+    /**
+     * Inputs just have one square generally, so return it
+     * This could be better for textareas
+     */
+    topRect: function() {
+      return this.getRegion();
+    },
 
+    shrinkRight: function() {
+        this.node.selectionEnd--;
     },
 
     extendRight: function() {
-
+      this.node.selectionEnd++;
     },
 
     shrinkLeft: function() {
-
+      this.node.selectionStart++;
     },
 
     extendLeft: function() {
-
+      this.node.selectionStart--;
     }
   };
 

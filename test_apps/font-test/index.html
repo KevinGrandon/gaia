@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <title>Font Test!</title>
+
+    <link rel="stylesheet" type="text/css" href="shared/style/headers.css" />
+    <link rel="stylesheet" type="text/css" href="shared/style_unstable/lists.css">
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-size: 10px;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      p {
+        font-size: 25px;
+      }
+
+      .icon {
+        color: #ff4e00;
+      }
+
+      .icon-large {
+        color: #008eab;
+      }
+      
+      li span:first-child {
+        float: left;
+        width: calc(100% - 15rem);
+      }
+
+      [class^="icon-"]:before, [class*=" icon-"]:before {
+        font-family: "mozicons";
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        text-decoration: inherit;
+      }
+      
+      a [class^="icon-"], a [class*=" icon-"] {
+        display: inline-block;
+        text-decoration: inherit;
+      }
+
+      .icon-large:before {
+        vertical-align: top;
+        font-size: 1.333em;
+      }
+
+      .icon-camera:before { content: "\f100"; }
+      .icon-delete:before { content: "\f101"; }
+      .icon-set_background:before { content: "\f102"; }
+      .icon-share:before { content: "\f103"; }
+
+    </style>
+  </head>
+
+  <body>
+    <section role="region">
+      <header>
+        <h1>Icon Font Test</h1>
+      </header>
+    </section>
+    <section data-type="list">
+      <ul>
+        <li>
+          <p>
+            <span>camera</span>
+            <span class="icon icon-camera"></span>
+            <span class="icon-large icon-camera"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>delete</span>
+            <span class="icon icon-delete"></span>
+            <span class="icon-large icon-delete"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>set_background</span>
+            <span class="icon icon-set_background"></span>
+            <span class="icon-large icon-set_background"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>share</span>
+            <span class="icon icon-share"></span>
+            <span class="icon-large icon-share"></span>
+          </p>
+        </li>
+      </ul>
+    </section>
+  </body>
+
+</html>

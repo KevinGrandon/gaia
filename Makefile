@@ -699,6 +699,19 @@ endif
 	@echo 'Starting b2g'
 	$(ADB) shell start b2g
 
+# make the MozIcons font
+font:
+	fontcustom compile --nohash -n=MozIcons ./fonts/MozIcons/src/
+	mv ./fonts/MozIcons/fontcustom/* ./fonts/MozIcons/.
+	rm -rf ./fonts/MozIcons/fontcustom/
+	rm ./fonts/MozIcons/fontcustom-ie7.css
+	rm ./fonts/MozIcons/mozicons.svg
+	rm ./fonts/MozIcons/mozicons.woff
+	rm ./fonts/MozIcons/mozicons.eot
+
+install-font:
+	adb push ./fonts/MozIcons/mozicons.ttf /system/fonts/mozicons.ttf
+
 # Copy demo media to the sdcard.
 # If we've got old style directories on the phone, rename them first.
 install-media-samples:

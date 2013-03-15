@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <title>Font Test!</title>
+
+    <link rel="stylesheet" type="text/css" href="shared/style/headers.css" />
+    <link rel="stylesheet" type="text/css" href="shared/style_unstable/lists.css">
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-size: 10px;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      p {
+        font-size: 25px;
+      }
+
+      .icon {
+        color: #ff4e00;
+      }
+
+      .icon-large {
+        color: #008eab;
+      }
+      
+      li span:first-child {
+        float: left;
+        width: calc(100% - 15rem);
+      }
+
+      [class^="icon-"]:before, [class*=" icon-"] {
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        text-decoration: inherit;
+        background: #000;
+        height: 30px;
+        width: 30px;
+      }
+      
+      a [class^="icon-"], a [class*=" icon-"] {
+        display: inline-block;
+        text-decoration: inherit;
+      }
+
+      .icon-large {
+        vertical-align: top;
+        font-size: 1.333em;
+      }
+
+      .icon-camera {
+        background-image: url('style/images/iconaction_camera_30x30.png');
+      }
+      .icon-delete {
+        background-image: url('style/images/iconaction_delete_30x30.png');
+      }
+      .icon-set_background {
+        background-image: url('style/images/iconaction_camera_editphoto_30x30.png');
+      }
+      .icon-share {
+        background-image: url('style/images/iconaction_share_30x30.png');
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <section role="region">
+      <header>
+        <h1>Icon Font Test</h1>
+      </header>
+    </section>
+    <section data-type="list">
+      <ul>
+        <li>
+          <p>
+            <span>camera</span>
+            <span class="icon icon-camera"></span>
+            <span class="icon-large icon-camera"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>delete</span>
+            <span class="icon icon-delete"></span>
+            <span class="icon-large icon-delete"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>set_background</span>
+            <span class="icon icon-set_background"></span>
+            <span class="icon-large icon-set_background"></span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <span>share</span>
+            <span class="icon icon-share"></span>
+            <span class="icon-large icon-share"></span>
+          </p>
+        </li>
+      </ul>
+    </section>
+  </body>
+
+</html>

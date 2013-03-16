@@ -4,8 +4,9 @@
 function Clipboard() {
   this.clipboard = '';
 
-  this.MENU_ADJUST_TOP = -45;
+  this.MENU_ADJUST_TOP = -30;
   this.MENU_ADJUST_LEFT = 20;
+  this.KNOB_SIZE = 30;
 
   this.INTERACT_DELAY = 700;
   this.TOUCH_BOUND = 50;
@@ -23,8 +24,6 @@ Clipboard.prototype = {
   },
 
   onStart: function(e) {
-    dump('GOT TOUCH START' + e);
-
     if (this.controlsShown) {
       this.teardown();
       return;
@@ -40,6 +39,11 @@ Clipboard.prototype = {
   },
 
   onMove: function(e) {
+
+    if (!this.startXY) {
+      return;
+    }
+
     var xy = this.coords(e);
 
     if (!this.controlsShown && (
@@ -57,6 +61,7 @@ Clipboard.prototype = {
       return;
     }
 
+    delete this.startXY;
     this.teardown();
   },
 
@@ -78,8 +83,8 @@ Clipboard.prototype = {
     // Get the region of the selection
     var targetArea = target.getBoundingClientRect();
     var leftKnobPos = {
-      top: targetArea.top + window.pageYOffset,
-      left: targetArea.left + window.pageXOffset
+      top: targetArea.top + window.pageYOffset - 15,
+      left: targetArea.left + window.pageXOffset - 20
     };
 
     var rightKnobPos = this.strategy.endPosition();
@@ -176,6 +181,7 @@ Clipboard.prototype = {
 
     this[knob] = document.createElement('div');
     this[knob].className = 'knob ' + name;
+    this[knob].innerHTML = '<span></span>';
     document.body.appendChild(this[knob]);
 
     this[knob].style.left = pos.left + 'px';
@@ -184,14 +190,21 @@ Clipboard.prototype = {
     this[knob].addEventListener(this.START, function(origEvt) {
 
       this[knob].classList.add('moving');
+      this.optionsEl.classList.add('moving');
+
       origEvt.stopImmediatePropagation();
       origEvt.preventDefault();
 
-      var mover = this.getKnobMover(this[knob]);
+      var mover = this.getKnobMover(name);
       window.addEventListener(this.MOVE, mover);
       window.addEventListener(this.END, function() {
         window.removeEventListener(this.MOVE, mover);
-        this[knob].classList.remove('moving');
+        if (this[knob]) {
+          this[knob].classList.remove('moving');
+        }
+        if (this.optionsEl) {
+          this.optionsEl.classList.remove('moving');
+        }
       }.bind(this));
     }.bind(this));
   },
@@ -201,23 +214,24 @@ Clipboard.prototype = {
    * when the right knob is moved.
    */
   rightKnobHandler: function(xy, el) {
-    var modification = 'word';
     var direction;
 
-    if (xy.x > parseInt(el.style.left, 10) ||
-        xy.y > parseInt(el.style.top, 10)) {
+    var thisPosition = this.strategy.bottomRect();
+
+    if (xy.y > thisPosition.bottom ||
+        xy.x > thisPosition.right) {
       direction = 'right';
     } else {
       direction = 'left';
     }
 
     var lastPosition = {};
+    var buffer = 10;
     while (true) {
 
-      var thisPosition = this.strategy.bottomRect();
+      thisPosition = this.strategy.bottomRect();
 
       // Break if we meet the word, or did not move on this iteration
-      var buffer = 10;
       if (thisPosition.bottom == lastPosition.bottom &&
         thisPosition.right == lastPosition.right) {
         break;
@@ -258,7 +272,7 @@ Clipboard.prototype = {
     }
 
     var lastPosition = {};
-
+    var buffer = 10;
     while (true) {
 
       thisPosition = this.strategy.topRect();
@@ -266,10 +280,7 @@ Clipboard.prototype = {
       if (thisPosition.top == lastPosition.top &&
         thisPosition.left == lastPosition.left) {
         break;
-      }
-
-      var buffer = 10;
-      if (direction == 'right' && (
+      } else if (direction == 'right' && (
         thisPosition.top + buffer > xy.y &&
         thisPosition.left + buffer > xy.x)) {
         break;
@@ -292,23 +303,22 @@ Clipboard.prototype = {
   /**
    * Is called when the user has tapped on a knob
    * and moves their finger around.
+   * @param {String} knob name (left or right)
    */
-  getKnobMover: function(el) {
+  getKnobMover: function(name) {
     var self = this;
+    var el = this[name + 'Knob'];
 
     return function(evt) {
       evt.stopImmediatePropagation();
 
       var xy = self.coords(evt);
 
-      if (el.classList.contains('right')) {
-        self.rightKnobHandler(xy, el);
-      } else {
-        self.leftKnobHandler(xy, el);
-      }
+      // Dynamically call leftKnobHandler or rightKnobHandler
+      self[name + 'KnobHandler'](xy, el);
 
-      el.style.left = xy.x + 'px';
-      el.style.top = xy.y + 'px';
+      el.style.left = (xy.x - self.KNOB_SIZE/2) + 'px';
+      el.style.top = (xy.y - self.KNOB_SIZE/2) + 'px';
 
       self.positionMenu();
     }

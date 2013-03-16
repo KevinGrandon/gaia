@@ -22,7 +22,7 @@ HtmlContentStrategy.prototype = {
   },
 
   paste: function(clipboard) {
-    range = this.sel.getRangeAt(0);
+    var range = this.sel.getRangeAt(0);
     range.deleteContents();
     range.insertNode(document.createTextNode(clipboard.value));
   },
@@ -32,63 +32,47 @@ HtmlContentStrategy.prototype = {
    * This is currently the entire elemtn
    */
   initialSelection: function() {
-    window.getSelection().selectAllChildren(this.node);
+
+    var directions = ['left', 'right'];
+
+    this.extendLeft('word')
+    this.extendRight('word')
   },
 
   /**
-   * Returns the topmost rectangle that makes up the selection
+   * Rebuilds selection from knob placement
+   * @param {Object} left selection control.
+   * @param {Object} right selection control.
    */
-  topRect: function() {
-    var range = this.sel.getRangeAt(0);
-    var rects = range.getClientRects();
+  rebuildSelection: function(left, right) {
+    var start = document.caretPositionFromPoint(left.cursorX, left.cursorY);
+    var end = document.caretPositionFromPoint(right.cursorX, right.cursorY);
+    //console.log('Debug viewport offsets:', start.offsetNode, start.offset, end.offsetNode, end.offset)
 
-    var topmost;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!topmost || rect.top < topmost.top) {
-        topmost = rect;
-      }
-    }
-
-    if (!topmost) {
-      return {};
-    }
-
-    var rangePosition = {
-      top: topmost.top + window.pageYOffset,
-      left: topmost.left + window.pageXOffset
-    };
-
-    return rangePosition;
+    this.sel.removeAllRanges();
+    var newRange = document.createRange();
+    newRange.setStart(start.offsetNode, start.offset);
+    newRange.setEnd(end.offsetNode, end.offset);
+    this.sel.addRange(newRange);
   },
 
   /**
-   * Returns the bottom rectangle that makes up the selection
+   * Normalized wrapper for getBoundingClientRect()
    */
-  bottomRect: function() {
+  getRegion: function() {
     var range = this.sel.getRangeAt(0);
-    var rects = range.getClientRects();
+    var region =  range.getBoundingClientRect();
 
-    var bottom;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!bottom || rect.bottom > bottom.bottom) {
-        bottom = rect;
-      }
+    return {
+      top: region.top + window.pageYOffset,
+      left: region.left + window.pageXOffset,
+      bottom: region.bottom + window.pageYOffset,
+      right: region.right + window.pageXOffset
     }
-
-    if (!bottom) {
-      return {};
-    }
-
-    var rangePosition = {
-      bottom: bottom.bottom + window.pageYOffset,
-      right: bottom.right + window.pageXOffset
-    };
-
-    return rangePosition;
   },
 
    /**
-   * Gets the outer rectangle coordinates of the selction
+   * Gets fthe outer rectangle coordinates of the selction
    * Normalizes data to absolute values with window offsets.
    */
   endPosition: function() {

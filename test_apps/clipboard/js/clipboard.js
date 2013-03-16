@@ -1,16 +1,25 @@
 (function() {
+var LEFT_CONTROL_ADJUST_Y = 5;
+var LEFT_CONTROL_ADJUST_X = - 10;
+var RIGHT_CONTROL_ADJUST_Y = 25;
+var RIGHT_CONTROL_ADJUST_X = 10;
+
+var RANGE_ADJUST_Y = 10;
+var RANGE_ADJUST_X = 30;
+
+var KNOB_SIZE = 50;
+
+var MENU_ADJUST_TOP = - 55;
+var MENU_ADJUST_LEFT = 15;
+
+var INTERACT_DELAY = 700;
+var INIT_MOVE_LIMIT = 50;
+
 /**
  * Copy/Paste base class
  */
 function Clipboard() {
   this.clipboard = '';
-
-  this.MENU_ADJUST_TOP = -30;
-  this.MENU_ADJUST_LEFT = 35;
-  this.KNOB_SIZE = 30;
-
-  this.INTERACT_DELAY = 700;
-  this.TOUCH_BOUND = 50;
 
   this.controlsShown = false;
 
@@ -35,7 +44,7 @@ Clipboard.prototype = {
 
     this.interactTimeout = setTimeout(
       this.showControls.bind(this),
-      this.INTERACT_DELAY
+      INTERACT_DELAY
     );
   },
 
@@ -48,8 +57,8 @@ Clipboard.prototype = {
     var xy = this.coords(e);
 
     if (!this.controlsShown && (
-        Math.abs(this.startXY.x - xy.x) > this.TOUCH_BOUND ||
-        Math.abs(this.startXY.y - xy.y) > this.TOUCH_BOUND)) {
+        Math.abs(this.startXY.x - xy.x) > INIT_MOVE_LIMIT ||
+        Math.abs(this.startXY.y - xy.y) > INIT_MOVE_LIMIT)) {
       this.teardown();
     }
 
@@ -82,13 +91,21 @@ Clipboard.prototype = {
     this.strategy.initialSelection();
 
     // Get the region of the selection
-    var targetArea = target.getBoundingClientRect();
+    var targetArea = this.strategy.getRegion();
     var leftKnobPos = {
-      top: targetArea.top + window.pageYOffset - 15,
-      left: targetArea.left + window.pageXOffset - 20
+      y: targetArea.top + LEFT_CONTROL_ADJUST_Y,
+      x: targetArea.left + LEFT_CONTROL_ADJUST_X,
+      offsetY: RANGE_ADJUST_Y,
+      offsetX: RANGE_ADJUST_X,
     };
 
-    var rightKnobPos = this.strategy.endPosition();
+    var rightTargetArea = this.strategy.endPosition();
+    var rightKnobPos = {
+      y: rightTargetArea.top + RIGHT_CONTROL_ADJUST_Y,
+      x: rightTargetArea.left + RIGHT_CONTROL_ADJUST_X,
+      offsetY: -RANGE_ADJUST_Y,
+      offsetX: -RANGE_ADJUST_X
+    };
 
     this.createKnob('left', leftKnobPos);
     this.createKnob('right', rightKnobPos);
@@ -112,11 +129,11 @@ Clipboard.prototype = {
 
   positionMenu: function() {
 
-    var top = parseInt(this.leftKnob.style.top, 10);
-    var left = parseInt(this.leftKnob.style.left, 10);
+    var top = this.leftKnob.y;
+    var left = this.leftKnob.x;
 
-    this.optionsEl.style.top = (top + this.MENU_ADJUST_TOP) + 'px';
-    this.optionsEl.style.left = (left + this.MENU_ADJUST_LEFT) + 'px';
+    this.optionsEl.style.top = (top + MENU_ADJUST_TOP) + 'px';
+    this.optionsEl.style.left = (left + MENU_ADJUST_LEFT) + 'px';
   },
 
   /**
@@ -154,12 +171,12 @@ Clipboard.prototype = {
     }
 
     if (this.leftKnob) {
-      document.body.removeChild(this.leftKnob);
+      document.body.removeChild(this.leftKnob.element);
       delete this.leftKnob;
     }
 
     if (this.rightKnob) {
-      document.body.removeChild(this.rightKnob);
+      document.body.removeChild(this.rightKnob.element);
       delete this.rightKnob;
     }
 
@@ -177,20 +194,21 @@ Clipboard.prototype = {
   createKnob: function(name, pos) {
     var knob = name + 'Knob';
     if (this[knob]) {
-      this[knob].parentNode.removeChild(this[knob]);
+      document.body.removeChild(this[knob].element);
+      delete this[knob];
     }
 
-    this[knob] = document.createElement('div');
-    this[knob].className = 'knob ' + name;
-    this[knob].innerHTML = '<span></span>';
-    document.body.appendChild(this[knob]);
+    this[knob] = new SelectionControl({
+      className: name,
+      x: pos.x,
+      y: pos.y,
+      offsetY: pos.offsetY,
+      offsetX: pos.offsetX
+    });
 
-    this[knob].style.left = pos.left + 'px';
-    this[knob].style.top = pos.top + 'px';
+    this[knob].element.addEventListener(this.START, function(origEvt) {
 
-    this[knob].addEventListener(this.START, function(origEvt) {
-
-      this[knob].classList.add('moving');
+      this[knob].element.classList.add('moving');
       this.optionsEl.classList.add('moving');
 
       origEvt.stopImmediatePropagation();
@@ -201,104 +219,13 @@ Clipboard.prototype = {
       window.addEventListener(this.END, function() {
         window.removeEventListener(this.MOVE, mover);
         if (this[knob]) {
-          this[knob].classList.remove('moving');
+          this[knob].element.classList.remove('moving');
         }
         if (this.optionsEl) {
           this.optionsEl.classList.remove('moving');
         }
       }.bind(this));
     }.bind(this));
-  },
-
-  /**
-   * Logic to expand/collapse the selection
-   * when the right knob is moved.
-   */
-  rightKnobHandler: function(xy, el) {
-    var direction;
-
-    var thisPosition = this.strategy.bottomRect();
-
-    if (xy.y > thisPosition.bottom ||
-        xy.x > thisPosition.right) {
-      direction = 'right';
-    } else {
-      direction = 'left';
-    }
-
-    var lastPosition = {};
-    var buffer = 10;
-    while (true) {
-
-      thisPosition = this.strategy.bottomRect();
-
-      // Break if we meet the word, or did not move on this iteration
-      if (thisPosition.bottom == lastPosition.bottom &&
-        thisPosition.right == lastPosition.right) {
-        break;
-      } else if (direction == 'right' &&
-        thisPosition.bottom + buffer > xy.y &&
-        thisPosition.right + buffer > xy.x) {
-        break;
-      } else if (direction == 'left' &&
-        thisPosition.bottom - buffer < xy.y &&
-        thisPosition.right - buffer < xy.x) {
-        break;
-      }
-
-      if (direction == 'left') {
-        this.strategy.shrinkRight();
-      } else {
-        this.strategy.extendRight();
-      }
-
-      lastPosition = thisPosition;
-    }
-  },
-
-  /**
-   * Logic to expand/collapse the selection
-   * when the left knob is moved.
-   */
-  leftKnobHandler: function(xy, el) {
-    var direction;
-
-    var thisPosition = this.strategy.topRect();
-
-    if (xy.y < thisPosition.top ||
-        xy.x < thisPosition.left) {
-      direction = 'left';
-    } else {
-      direction = 'right';
-    }
-
-    var lastPosition = {};
-    var buffer = 10;
-    while (true) {
-
-      thisPosition = this.strategy.topRect();
-      // Break if we meet the word, or did not move on this iteration
-      if (thisPosition.top == lastPosition.top &&
-        thisPosition.left == lastPosition.left) {
-        break;
-      } else if (direction == 'right' && (
-        thisPosition.top + buffer > xy.y &&
-        thisPosition.left + buffer > xy.x)) {
-        break;
-      } else if (direction == 'left' &&
-        thisPosition.top - buffer < xy.y &&
-        thisPosition.left - buffer < xy.x) {
-        break;
-      }
-
-      if (direction == 'left') {
-        this.strategy.extendLeft();
-      } else {
-        this.strategy.shrinkLeft();
-      }
-
-      lastPosition = thisPosition;
-    }
   },
 
   /**
@@ -315,14 +242,67 @@ Clipboard.prototype = {
 
       var xy = self.coords(evt);
 
-      // Dynamically call leftKnobHandler or rightKnobHandler
-      self[name + 'KnobHandler'](xy, el);
+      el.x = xy.x;
+      el.y = xy.y;
 
-      el.style.left = (xy.x - self.KNOB_SIZE/2) + 'px';
-      el.style.top = (xy.y - self.KNOB_SIZE/2) + 'px';
+      self.strategy.rebuildSelection(self.leftKnob, self.rightKnob);
 
       self.positionMenu();
     }
+  }
+};
+function SelectionControl(config) {
+
+  var defaults = {
+    x: 0,
+    y: 0,
+    offsetY: 0,
+    offsetX: 0
+  };
+
+  for (var i in defaults) {
+    if (config[i] === undefined) {
+      config[i] = defaults[i];
+    }
+  }
+  this.config = config;
+
+  this.element = document.createElement('div');
+  this.element.className = 'knob ' + config.className;
+  this.element.innerHTML = '<span></span>';
+  document.body.appendChild(this.element);
+
+  // Initial positions
+  this.x = config.x;
+  this.y = config.y;
+}
+
+SelectionControl.prototype = {
+
+  set x(pos) {
+    this.config.x = pos;
+    this.element.style.left = (pos - KNOB_SIZE/2) + 'px';
+  },
+
+  set y(pos) {
+    this.config.y = pos;
+    this.element.style.top = (pos - KNOB_SIZE/2) + 'px';
+  },
+
+  get x() {
+    return this.config.x;
+  },
+
+  get y() {
+    return this.config.y;
+  },
+
+  get cursorX() {
+    return this.config.x - window.pageXOffset + this.config.offsetX;
+  },
+
+  get cursorY() {
+    return this.config.y - window.pageYOffset + this.config.offsetY;
   }
 };function HtmlInputStrategy(node) {
   this.node = node;
@@ -342,21 +322,65 @@ HtmlInputStrategy.prototype = {
   cut: function(clipboard) {
     this.copy(clipboard);
     this.node.value = this.node.value
-      .substring(0, this.node.selectionStart - 1) +
+      .substring(0, this.node.selectionStart) +
       this.node.value.substring(this.node.selectionEnd);
   },
 
   paste: function(clipboard) {
-    this.node.value = clipboard.value;
+    this.node.value = this.node.value
+      .substring(0, this.node.selectionStart) +
+      clipboard.value +
+      this.node.value.substring(this.node.selectionEnd)
   },
 
   /**
    * Creates the initial selection
-   * This is currently the entire value of the input
+   * It should be whatever word you were focused on
    */
   initialSelection: function() {
-    this.node.selectionStart = 0;
-    this.node.selectionEnd = this.node.value.length;
+
+    var value = this.node.value;
+
+    var leftBound = this.node.selectionStart;
+    var rightBound = this.node.selectionEnd;
+    var start = this.node.selectionStart;
+
+    for (var i = leftBound-1, letter; letter = value[i]; i--) {
+      if (/[\s]+/.test(letter)) {
+        break;
+      } else {
+        leftBound--;
+        if (!leftBound) {
+          break;
+        }
+      }
+    }
+
+    for (var i = rightBound, letter; letter = value[i]; i++) {
+      if (/[\s]+/.test(letter)) {
+        break;
+      } else {
+        rightBound++;
+        if (!rightBound) {
+          break;
+        }
+      }
+    }
+
+    this.node.selectionStart = leftBound;
+    this.node.selectionEnd = rightBound;
+  },
+
+  /**
+   * Rebuilds selection from knob placement
+   */
+  rebuildSelection: function(left, right) {
+    var start = document.caretPositionFromPoint(left.cursorX, left.cursorY);
+    var end = document.caretPositionFromPoint(right.cursorX, right.cursorY);
+    //console.log('Debug viewport offsets:', start.offsetNode, start.offset, end.offsetNode, end.offset)
+
+    this.node.selectionStart = start.offset;
+    this.node.selectionEnd = end.offset;
   },
 
   /**
@@ -480,58 +504,6 @@ HtmlInputStrategy.prototype = {
     };
   },
 
-  /**
-   * Inputs just have one square generally, so return it
-   * This could be better for textareas
-   */
-  bottomRect: function() {
-    var rects = this.getRegion('getClientRects');
-
-    var bottom;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!bottom || rect.bottom > bottom.bottom) {
-        bottom = rect;
-      }
-    }
-
-    if (!bottom) {
-      return {};
-    }
-
-    var rangePosition = {
-      bottom: bottom.bottom + window.pageYOffset,
-      right: bottom.right + window.pageXOffset
-    };
-
-    return rangePosition;
-  },
-
-  /**
-   * Inputs just have one square generally, so return it
-   * This could be better for textareas
-   */
-  topRect: function() {
-    var rects = this.getRegion('getClientRects');
-
-    var topmost;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!topmost || rect.top < topmost.top) {
-        topmost = rect;
-      }
-    }
-
-    if (!topmost) {
-      return {};
-    }
-
-    var rangePosition = {
-      top: topmost.top + window.pageYOffset,
-      left: topmost.left + window.pageXOffset
-    };
-
-    return rangePosition;
-  },
-
   shrinkRight: function() {
       this.node.selectionEnd--;
   },
@@ -571,7 +543,7 @@ HtmlContentStrategy.prototype = {
   },
 
   paste: function(clipboard) {
-    range = this.sel.getRangeAt(0);
+    var range = this.sel.getRangeAt(0);
     range.deleteContents();
     range.insertNode(document.createTextNode(clipboard.value));
   },
@@ -581,63 +553,47 @@ HtmlContentStrategy.prototype = {
    * This is currently the entire elemtn
    */
   initialSelection: function() {
-    window.getSelection().selectAllChildren(this.node);
+
+    var directions = ['left', 'right'];
+
+    this.extendLeft('word')
+    this.extendRight('word')
   },
 
   /**
-   * Returns the topmost rectangle that makes up the selection
+   * Rebuilds selection from knob placement
+   * @param {Object} left selection control.
+   * @param {Object} right selection control.
    */
-  topRect: function() {
-    var range = this.sel.getRangeAt(0);
-    var rects = range.getClientRects();
+  rebuildSelection: function(left, right) {
+    var start = document.caretPositionFromPoint(left.cursorX, left.cursorY);
+    var end = document.caretPositionFromPoint(right.cursorX, right.cursorY);
+    //console.log('Debug viewport offsets:', start.offsetNode, start.offset, end.offsetNode, end.offset)
 
-    var topmost;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!topmost || rect.top < topmost.top) {
-        topmost = rect;
-      }
-    }
-
-    if (!topmost) {
-      return {};
-    }
-
-    var rangePosition = {
-      top: topmost.top + window.pageYOffset,
-      left: topmost.left + window.pageXOffset
-    };
-
-    return rangePosition;
+    this.sel.removeAllRanges();
+    var newRange = document.createRange();
+    newRange.setStart(start.offsetNode, start.offset);
+    newRange.setEnd(end.offsetNode, end.offset);
+    this.sel.addRange(newRange);
   },
 
   /**
-   * Returns the bottom rectangle that makes up the selection
+   * Normalized wrapper for getBoundingClientRect()
    */
-  bottomRect: function() {
+  getRegion: function() {
     var range = this.sel.getRangeAt(0);
-    var rects = range.getClientRects();
+    var region =  range.getBoundingClientRect();
 
-    var bottom;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!bottom || rect.bottom > bottom.bottom) {
-        bottom = rect;
-      }
+    return {
+      top: region.top + window.pageYOffset,
+      left: region.left + window.pageXOffset,
+      bottom: region.bottom + window.pageYOffset,
+      right: region.right + window.pageXOffset
     }
-
-    if (!bottom) {
-      return {};
-    }
-
-    var rangePosition = {
-      bottom: bottom.bottom + window.pageYOffset,
-      right: bottom.right + window.pageXOffset
-    };
-
-    return rangePosition;
   },
 
    /**
-   * Gets the outer rectangle coordinates of the selction
+   * Gets fthe outer rectangle coordinates of the selction
    * Normalizes data to absolute values with window offsets.
    */
   endPosition: function() {

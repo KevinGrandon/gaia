@@ -16,21 +16,65 @@ HtmlInputStrategy.prototype = {
   cut: function(clipboard) {
     this.copy(clipboard);
     this.node.value = this.node.value
-      .substring(0, this.node.selectionStart - 1) +
+      .substring(0, this.node.selectionStart) +
       this.node.value.substring(this.node.selectionEnd);
   },
 
   paste: function(clipboard) {
-    this.node.value = clipboard.value;
+    this.node.value = this.node.value
+      .substring(0, this.node.selectionStart) +
+      clipboard.value +
+      this.node.value.substring(this.node.selectionEnd)
   },
 
   /**
    * Creates the initial selection
-   * This is currently the entire value of the input
+   * It should be whatever word you were focused on
    */
   initialSelection: function() {
-    this.node.selectionStart = 0;
-    this.node.selectionEnd = this.node.value.length;
+
+    var value = this.node.value;
+
+    var leftBound = this.node.selectionStart;
+    var rightBound = this.node.selectionEnd;
+    var start = this.node.selectionStart;
+
+    for (var i = leftBound-1, letter; letter = value[i]; i--) {
+      if (/[\s]+/.test(letter)) {
+        break;
+      } else {
+        leftBound--;
+        if (!leftBound) {
+          break;
+        }
+      }
+    }
+
+    for (var i = rightBound, letter; letter = value[i]; i++) {
+      if (/[\s]+/.test(letter)) {
+        break;
+      } else {
+        rightBound++;
+        if (!rightBound) {
+          break;
+        }
+      }
+    }
+
+    this.node.selectionStart = leftBound;
+    this.node.selectionEnd = rightBound;
+  },
+
+  /**
+   * Rebuilds selection from knob placement
+   */
+  rebuildSelection: function(left, right) {
+    var start = document.caretPositionFromPoint(left.cursorX, left.cursorY);
+    var end = document.caretPositionFromPoint(right.cursorX, right.cursorY);
+    //console.log('Debug viewport offsets:', start.offsetNode, start.offset, end.offsetNode, end.offset)
+
+    this.node.selectionStart = start.offset;
+    this.node.selectionEnd = end.offset;
   },
 
   /**
@@ -152,58 +196,6 @@ HtmlInputStrategy.prototype = {
       top: region.bottom + window.pageYOffset,
       left: region.right + window.pageYOffset
     };
-  },
-
-  /**
-   * Inputs just have one square generally, so return it
-   * This could be better for textareas
-   */
-  bottomRect: function() {
-    var rects = this.getRegion('getClientRects');
-
-    var bottom;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!bottom || rect.bottom > bottom.bottom) {
-        bottom = rect;
-      }
-    }
-
-    if (!bottom) {
-      return {};
-    }
-
-    var rangePosition = {
-      bottom: bottom.bottom + window.pageYOffset,
-      right: bottom.right + window.pageXOffset
-    };
-
-    return rangePosition;
-  },
-
-  /**
-   * Inputs just have one square generally, so return it
-   * This could be better for textareas
-   */
-  topRect: function() {
-    var rects = this.getRegion('getClientRects');
-
-    var topmost;
-    for (var i = 0, rect; rect = rects[i]; i++) {
-      if (!topmost || rect.top < topmost.top) {
-        topmost = rect;
-      }
-    }
-
-    if (!topmost) {
-      return {};
-    }
-
-    var rangePosition = {
-      top: topmost.top + window.pageYOffset,
-      left: topmost.left + window.pageXOffset
-    };
-
-    return rangePosition;
   },
 
   shrinkRight: function() {

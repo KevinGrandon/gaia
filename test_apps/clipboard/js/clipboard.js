@@ -116,7 +116,8 @@ Clipboard.prototype = {
       '<li data-action="cut">Cut</li>',
       '<li data-action="copy">Copy</li>'
     ];
-    if (this.clipboard) {
+
+    if (this.clipboard && this.strategy.canPaste) {
       actions.push('<li data-action="paste">Paste</li>');
     }
     this.optionsEl.innerHTML = actions.join('');
@@ -305,6 +306,7 @@ SelectionControl.prototype = {
     return this.config.y - window.pageYOffset + this.config.offsetY;
   }
 };function HtmlInputStrategy(node) {
+  this.canPaste = true;
   this.node = node;
 }
 
@@ -379,8 +381,12 @@ HtmlInputStrategy.prototype = {
     var end = document.caretPositionFromPoint(right.cursorX, right.cursorY);
     //console.log('Debug viewport offsets:', start.offsetNode, start.offset, end.offsetNode, end.offset)
 
-    this.node.selectionStart = start.offset;
-    this.node.selectionEnd = end.offset;
+    // Extend the range a bit so there isn't a big gap
+    // We do the same for the content strategy
+    var extension = 2;
+
+    this.node.selectionStart = start.offset - extension;
+    this.node.selectionEnd = end.offset + extension;
   },
 
   /**
@@ -515,6 +521,7 @@ HtmlInputStrategy.prototype = {
  * General range helper functions
  */
 function HtmlContentStrategy(node) {
+  this.canPaste = false;
   this.node = node;
 }
 

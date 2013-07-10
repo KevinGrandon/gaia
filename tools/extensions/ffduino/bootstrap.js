@@ -49,24 +49,12 @@ function uninstall(data, reason) {
 function startFfduino() {
 	dump('OMG STARTING!!!!')
 	return
-	var device = '/dev/ttyS0'; // or '\\.\COM1' on windows
+	// TODO: Dynamically query with something like:
+	// var rport = os.platform() === 'darwin' ? 'cu' : 'tty'
+	// var grep = 'ls /dev | grep -iE \'usb|acm\' | grep -i ' + rport
+
 	const Cc = Components.classes;
 	const Ci = Components.interfaces;
-
-	var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-	file.initWithPath(device);
-
-	var outStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-	outStream.init(file, 0x02 | 0x10, 0664, 0); // WRONLY | APPEND
-
-	var binOutStream = Cc["@mozilla.org/binaryoutputstream;1"].createInstance(Ci.nsIBinaryOutputStream);
-	binOutStream.setOutputStream(outStream);
-
-	var data = "Hello";
-	binOutStream.write(data, data.length);
-
-	binOutStream.close();
-	outStream.close();
 
 
 	// Read from serial port

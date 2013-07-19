@@ -10,7 +10,6 @@ var Rocketbar = {
   bar: document.getElementById('rocketbar'),
   input: document.getElementById('rocketbar-input'),
   results: document.getElementById('rocketbar-results'),
-  plugins: document.getElementById('rocketbar-plugins'),
 
   /**
    * Initialise Rocketbar.
@@ -38,60 +37,18 @@ var Rocketbar = {
 
     Places.init(function(firstRun) {});
 
-    this.plugins.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-    }, true);
-
-    this.plugins.addEventListener('click', (function(e) {
-       this.toggleSearchEngine(e.originalTarget);
-        e.stopImmediatePropagation();
-        e.preventDefault();
-    }).bind(this), true);
-
     OpenSearchPlugins.retrieve((function(plugins) {
-      for (var i = 0; i < plugins.length; i++) {
-        var plugin = plugins[i];
-        var element = document.createElement('span');
-        element.dataset.name = plugin.name;
-        element.setAttribute('tabindex', '-1');
-
+      this.plugins = plugins;
+      /*
         var icon = document.createElement('img');
         icon.src = plugin.icon;
         element.appendChild(icon);
-
-        var name = document.createElement('span');
-        name.textContent = plugin.name;
-        element.appendChild(name);
-
-        this.plugins.appendChild(element);
-      }
+        */
     }).bind(this));
 
     navigator.mozSettings.addObserver('rocketbar.show', function(event) {
       this.open(true);
     }.bind(this));
-  },
-
-  activePlugin: null,
-  toggleSearchEngine: function rocketbar_toggleSearchEngine(target) {
-    if (target.dataset.name == this.activePlugin) {
-      target.classList.toggle('active');
-      return;
-    }
-
-    this.resetSearchEngine();
-
-    target.classList.add('active');
-    this.activePlugin = target.dataset.name;
-    this.handleKeyUp();
-  },
-
-  resetSearchEngine: function rocketbar_resetSearchEngine() {
-    var engines = this.plugins.querySelectorAll('span');
-    for (var i = 0; i < engines.length; i++) {
-      engines[i].classList.remove('active');
-    }
-    this.activePlugin = null;
   },
 
   lastY: 0,
@@ -152,10 +109,8 @@ var Rocketbar = {
 
     if (focus) {
       this.input.focus();
-      this.plugins.classList.add('open');
       this.results.classList.add('open');
     }
-
   },
 
   /**
@@ -170,8 +125,6 @@ var Rocketbar = {
     var focus = (this.input == document.activeElement);
     if (!focus || evenIfFocused) {
       this.results.classList.remove('open');
-      this.plugins.classList.remove('open');
-      this.resetSearchEngine();
       this.input.blur();
 
       var bar = this.bar;
@@ -212,7 +165,6 @@ var Rocketbar = {
     }
     this.input.select();
 
-    this.plugins.classList.add('open');
     this.results.classList.add('open');
     this._clearEarlyHide();
   },
@@ -234,6 +186,11 @@ var Rocketbar = {
 
   /**
    * Handle rocketbar key presses.
+   * Order results by:
+   * - Apps
+   * - Top Sites
+   * - Search Results for enabled providers
+   * - Direct search results for other providers
    *
    * @param {Event} evt The keyup event.
    */
@@ -244,14 +201,6 @@ var Rocketbar = {
     var query = this.input.value.toLowerCase().trim();
     if (query.length === 0) {
       this.showAppResults(results);
-      return;
-    }
-
-    if (this.activePlugin) {
-      this.results.innerHTML = '';
-      OpenSearchPlugins.getSuggestions(this.activePlugin, query, 5, (function(results) {
-        this.showSiteResults(results);
-      }).bind(this));
       return;
     }
 
@@ -267,6 +216,12 @@ var Rocketbar = {
     }, this);
     this.showAppResults(results);
     Places.getTopSites(20, query, this.showSiteResults.bind(this));
+
+    this.plugins.forEach(function(plugin) {
+      OpenSearchPlugins.getSuggestions(plugin.name, query, 4, (function(results) {
+        this.showSiteResults(results);
+      }.bind(this)));
+    }.bind(this));
   },
 
   /**
@@ -353,6 +308,7 @@ var Rocketbar = {
       resultItem.setAttribute('data-site-url', result.uri);
       resultItem.appendChild(resultTitle);
       resultItem.appendChild(resultURL);
+      resultItem.style.backgroundImage = 'url(' + result.icon + ')';
       this.results.appendChild(resultItem);
     }, this);
   },

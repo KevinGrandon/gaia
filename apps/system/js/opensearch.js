@@ -4,7 +4,7 @@ var OpenSearchPlugins = (function OpenSearchPlugins() {
 'use strict';
 
 function debug(str) {
-  dump('OpenSearchPlugins: ' + str + '\n');
+  console.log('OpenSearchPlugins: ' + str + '\n');
 }
 
 var OpenSearch = {
@@ -19,10 +19,6 @@ var OpenSearch = {
       if (this._readyCallback) {
         this.retrieve();
       }
-
-      setTimeout((function() {
-        this.getSuggestions('Bing', 'mozilla', 3);
-      }).bind(this), 10000);
     }).bind(this));
   },
 

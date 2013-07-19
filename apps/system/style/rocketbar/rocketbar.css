@@ -31,58 +31,13 @@
   border-radius: 0;
 }
 
-#rocketbar-plugins {
-  position: absolute;
-  top: 4.7rem;
-  height: 5rem;
-  line-height: 5rem;
-  width: 500px;
-  overflow-x: scroll;
-  list-style-type: none;
-  font-size: 2rem;
-  margin: 0;
-  padding: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-  border: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
-#rocketbar-plugins.open {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.3s linear;
-}
-
-#rocketbar-plugins > span {
-  border: 1px solid rgb(68, 68, 68);
-  border-radius: 0.5rem;
-  padding: 0.4rem;
-  margin-right: 0.5rem;
-  margin-left: 0.5rem;
-  color: #aaa;
-}
-
-#rocketbar-plugins > span.active {
-  background-color: rgba(0, 255, 255, 0.8);
-  color: white;
-}
-
-#rocketbar-plugins > span img {
-  margin-right: 1rem;
-}
-
-#rocketbar-plugins > span * {
-  pointer-events: none;
-}
-
 #rocketbar-results {
   position: absolute;
-  top: 9.7rem;
+  top: 4.7rem;
   margin: 0;
   padding: 0;
   width: 100%;
-  height: calc(100% - 6.7rem);
+  height: calc(100% - 1.7rem);
   overflow: scroll;
 
   list-style-type: none;

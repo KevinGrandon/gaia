@@ -39,11 +39,6 @@ var Rocketbar = {
 
     OpenSearchPlugins.retrieve((function(plugins) {
       this.plugins = plugins;
-      /*
-        var icon = document.createElement('img');
-        icon.src = plugin.icon;
-        element.appendChild(icon);
-        */
     }).bind(this));
 
     navigator.mozSettings.addObserver('rocketbar.show', function(event) {
@@ -217,8 +212,11 @@ var Rocketbar = {
     this.showAppResults(results);
     Places.getTopSites(20, query, this.showSiteResults.bind(this));
 
-    this.plugins.forEach(function(plugin) {
-      OpenSearchPlugins.getSuggestions(plugin.name, query, 4, (function(results) {
+    this.plugins.forEach(function(plugin, idx) {
+      OpenSearchPlugins.getSuggestions(plugin.name, query, 3, (function(results) {
+        results.forEach(function(result, resIdx) {
+          results[resIdx].icon = this.plugins[idx].icon;
+        }.bind(this));
         this.showSiteResults(results);
       }.bind(this)));
     }.bind(this));

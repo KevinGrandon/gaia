@@ -212,14 +212,12 @@ var Rocketbar = {
     this.showAppResults(results);
     Places.getTopSites(20, query, this.showSiteResults.bind(this));
 
-    this.plugins.forEach(function(plugin, idx) {
-      OpenSearchPlugins.getSuggestions(plugin.name, query, 3, (function(results) {
-        results.forEach(function(result, resIdx) {
-          results[resIdx].icon = this.plugins[idx].icon;
-        }.bind(this));
-        this.showSiteResults(results);
-      }.bind(this)));
-    }.bind(this));
+    this.plugins.forEach(function(plugin) {
+      var LIMIT = 4;
+      OpenSearchPlugins.getSuggestions(plugin.name, query, LIMIT, function(results) {
+        this.showSearchResults(results, plugin);
+      }.bind(this));
+    }, this);
   },
 
   /**
@@ -229,7 +227,7 @@ var Rocketbar = {
    */
   handleClick: function rocketbar_handleClick(evt) {
     var target = evt.target;
-
+console.log('GOT TARGET:', target, target.getAttribute('data-site-url'))
     this.close(true, function() {
       // If app, launch app
       var manifestURL = target.getAttribute('data-manifest-url');
@@ -296,7 +294,6 @@ var Rocketbar = {
    *  Show rocketbar results for a list of places.
    */
   showSiteResults: function rocketbar_showSiteResults(results) {
-    console.log(JSON.stringify(results));
     results.forEach(function(result) {
       var resultItem = document.createElement('li');
       var resultTitle = document.createElement('h3');
@@ -306,9 +303,31 @@ var Rocketbar = {
       resultItem.setAttribute('data-site-url', result.uri);
       resultItem.appendChild(resultTitle);
       resultItem.appendChild(resultURL);
-      resultItem.style.backgroundImage = 'url(' + result.icon + ')';
+      //resultItem.style.backgroundImage = 'url(' + result.icon + ')';
       this.results.appendChild(resultItem);
     }, this);
+  },
+
+  /**
+   *  Show rocketbar results for an open search
+   */
+  showSearchResults: function rocketbar_showSearchResults(results, plugin) {
+    var resultItem = document.createElement('li');
+    var resultTitle = document.createElement('h3');
+    resultTitle.textContent = 'Search ' + plugin.name + ' for:';
+    resultItem.appendChild(resultTitle);
+    resultItem.style.backgroundImage = 'url(' + plugin.icon + ')';
+
+    // Render individual results within the element
+    results.forEach(function(result) {
+      var resultURL = document.createElement('small');
+      resultURL.className = 'suggestion';
+      resultURL.textContent = result.title;
+      resultURL.setAttribute('data-site-url', result.uri);
+      resultItem.appendChild(resultURL);
+    }, this);
+
+    this.results.appendChild(resultItem);
   },
 
   /**

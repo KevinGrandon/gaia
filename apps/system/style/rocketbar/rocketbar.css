@@ -97,6 +97,17 @@
   padding: 0;
 }
 
+#rocketbar-results li small.suggestion {
+  display: inline-block;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  margin: 0.4rem 0.5rem 0.2rem;
+  background: #999; 
+  color: #fff;
+  pointer-events: auto;
+  line-height: 1.7rem;
+}
+
 #progress {
   position: absolute;
   width: 100%;

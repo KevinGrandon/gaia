@@ -93,7 +93,7 @@ var OpenSearch = {
           var baseURI = plugin.url.template;
 
           for ( var i=0 ; i < snapshot.snapshotLength; i++ ) {
-            if (i > count) {
+            if (i >= count) {
               break;
             }
 

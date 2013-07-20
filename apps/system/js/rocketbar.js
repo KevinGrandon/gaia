@@ -199,17 +199,13 @@ var Rocketbar = {
       return;
     }
 
-    // Keep track of the last query
-    this.lastQuery = query;
-
     // If the user is typing quickly, we may request multiple async results
     // This function verifies that the current query matches the desired query
+    this.lastQuery = query;
     var verifyQuery = function(callback) {
       return function() {
         if (this.lastQuery === query) {
           callback.apply(this, arguments);
-        } else {
-          console.log('OMFG DOESN"T MATHCH!!!!!!')
         }
       }.bind(this);
     }.bind(this);

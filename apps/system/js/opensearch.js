@@ -145,7 +145,7 @@ var defaults = {
     'url': {
       'method': 'get',
       'type': 'text/html',
-      'template': '"http://www.bing.com/search?q={searchTerms}&amp;FORM=MO0001'
+      'template': 'http://www.bing.com/search?q={searchTerms}&FORM=MO0001'
     },
     'suggestions': {
       'method': 'get',

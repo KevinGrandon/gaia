@@ -199,6 +199,21 @@ var Rocketbar = {
       return;
     }
 
+    // Keep track of the last query
+    this.lastQuery = query;
+
+    // If the user is typing quickly, we may request multiple async results
+    // This function verifies that the current query matches the desired query
+    var verifyQuery = function(callback) {
+      return function() {
+        if (this.lastQuery === query) {
+          callback.apply(this, arguments);
+        } else {
+          console.log('OMFG DOESN"T MATHCH!!!!!!')
+        }
+      }.bind(this);
+    }.bind(this);
+
     // Create a list of manifestURLs for apps with names which match the query
     var installedApps = Applications.installedApps;
     var manifestURLs = Object.keys(installedApps);
@@ -210,13 +225,15 @@ var Rocketbar = {
       }
     }, this);
     this.showAppResults(results);
-    Places.getTopSites(20, query, this.showSiteResults.bind(this));
+    Places.getTopSites(20, query, verifyQuery(this.showSiteResults));
 
     this.plugins.forEach(function(plugin) {
       var LIMIT = 4;
-      OpenSearchPlugins.getSuggestions(plugin.name, query, LIMIT, function(results) {
-        this.showSearchResults(results, plugin);
-      }.bind(this));
+      OpenSearchPlugins.getSuggestions(plugin.name, query, LIMIT, 
+        verifyQuery(function(results) {
+          this.showSearchResults(results, plugin);
+        })
+      );
     }, this);
   },
 
@@ -227,7 +244,7 @@ var Rocketbar = {
    */
   handleClick: function rocketbar_handleClick(evt) {
     var target = evt.target;
-console.log('GOT TARGET:', target, target.getAttribute('data-site-url'))
+
     this.close(true, function() {
       // If app, launch app
       var manifestURL = target.getAttribute('data-manifest-url');

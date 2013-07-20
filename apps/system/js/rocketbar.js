@@ -333,6 +333,11 @@ var Rocketbar = {
 
     // Render individual results within the element
     results.forEach(function(result) {
+
+      if (!result.title || !result.uri) {
+        return;
+      }
+
       var resultURL = document.createElement('small');
       resultURL.className = 'suggestion';
       resultURL.textContent = result.title;

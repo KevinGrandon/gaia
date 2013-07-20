@@ -81,7 +81,6 @@ var OpenSearch = {
             var uri = baseURI.replace('{searchTerms}', keywords[i]);
             results.push({ 'title': keywords[i], 'uri': uri});
           }
-          callback(results);
           break;
 
         case 'application/x-suggestions+xml':
@@ -101,7 +100,6 @@ var OpenSearch = {
             var uri = baseURI.replace('{searchTerms}', words);
             results.push({ 'title': words, 'uri': uri});
           }
-          callback(results);
 
           break;
 
@@ -109,6 +107,22 @@ var OpenSearch = {
           debug('Unsupported type: ' + type);
           break;
       }
+
+      // Insert the query into the response if it's not there
+      // We might want to control this with a parameter
+      var found = false;
+      for (var i = 0, result; result = results[i]; i++) {
+        if (result.title === search) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        var uri = baseURI.replace('{searchTerms}', search);
+        results.push({ 'title': search, 'uri': uri});
+      }
+
+      callback(results);
     };
 
     xhr.onerror = function() {
@@ -137,6 +151,28 @@ var OpenSearch = {
 };
 
 var defaults = {
+/*
+'Marketplace': {
+    'shortname': 'Mozilla Marketplace',
+    'icon': '',
+    'description': 'Marketplace opensearch plugin',
+    'encoding': 'UTF-8',
+    'url': {
+      'method': 'get',
+      'type': 'text/html',
+      'template': 'https://marketplace.firefox.com/search?q={searchTerms}'
+    },
+    'suggestions': {
+      'method': 'get',
+      'type': 'application/x-suggestions+json',
+      'template': 'https://marketplace.firefox.com/search',
+      'parameters': {
+        'q': '{searchTerms}'
+      }
+    }
+  },
+  */
+
   'Bing': {
     'shortname': 'Bing',
     'icon': 'data:image/x-icon;base64,AAABAAIAEBAAAAAAAAD/AAAAJgAAACAgAAAAAAAA+AMAACUBAACJUE5HDQoaCgAAAA1JSERSAAAAEAAAABAIBgAAAB/z/2EAAADGSURBVDjLY/i/TPQ/JZiBOgZsd/z/f08AhCbLgJdH/4MBiKaaAWtUIK4i4DJUA95d/v//xsz//788+o8VPN4GMRCnATAAMuByF8IFx3NR1dxbjscAkCTI+dicDDIIBkAuxWoALs0wDLIABH5+QDIA5DeY0wmFPMhrMAA34Gw1QhAtkFAwyHWwAIZahkiJoBiAOQ1kILpmkMHIaqBRy4BiOihgYACkCBQ2IIwcrSBDkNIFZl7YaARxAShcYAaAMCxaaZOZKMAAOzkOfhyf540AAAAASUVORK5CYIKJUE5HDQoaCgAAAA1JSERSAAAAIAAAACAIBgAAAHN6evQAAAO/SURBVFjDxZRJTxRBFMfrJiC7enKJ28nEGL+AXo2J+gFcrkr0C4gLKjCAoILKIgKyjSZG40FFMephHERcLm4XVzTRi7I4DHRPL8/3qqq7q6d7ZIgRO/mFzlT1+/3fq6ZZ8lzB9smq3JGxQwtgPhmvyHk1XpO3kZF8/EgOjB2eX8hJbkY3/4WjOTBRkQuMbuaVCsHEsVwOoxTzhpROHs8TnMjDAMe8hX/KcQFJOZVIFQaYPEE//mMqBb9QyKlGInmQiFCASpkG0WPVoF7m5xio63OmSvCreqEgIkjUILVEPjCeRhIWQF2fCwmCZI5QSqeIunyYOilg7iZEf5QWYDQG6nrW1OQLaj08aQFM1RdAskHApmhRkopHAgHU9ayp84RJop6Q0lMFME2cRs4UYoA674HQAHIt2bgUtNt7+R76PYzUUAS0gb2QbF8npA35rjTpSKV4urEQZhopQL0YCUEFfAG+xEC7s4//netFz+iDZZA8XSiEUsrFTUUwc1bAnHRE6nEk6+K012U4AtbX8JD25Cjo17e6wplzRaAR55FmCnAG5RIqlOnihQb3wXTLMnf/tAp11roc9HtlfG/6lbpf5ko5LcWgI2xGngVhPKkJ7/hNP2hYXN3LaZLjVEZKaO0rwHwbDdQx7uzkUr2VKIFUWwkGOItFJMZIMID54SaoewRFvpH6xup2WQzWx1v+YtoE6G1CnLqAtGMA9yHEfBoMoPesB3WPdr5Y0OyhN4txujgdRjcEG7q3i4uNi6UcphYyn9YGHlDXOS0enkzSVsw71J0OkfTLelEHRkepoBMDqMnN+MHgBMJEUpZSueBJeYe8y5AAT8rBRDGniwLIxDx12MiGyr11pTNV5iLHysEOreHyYL2rG1G8CMxLApZe0PqU9uLoE2Bc2+TvTOlQFTpQd9aNzfxZ37/y6G0utYhuAfN1QHSvBPvHy0AI6kYIJYqQztJwxkrykfKg/OcrsC6vdsVWj4D5Cjn0rgL7Wzz4QUiMgv26FayBbWD2r+JnyOnHwgPbwX7TyvcEPmLf42BdWe1KrZ7FYPUKmJM+DCu2P7Rg1lfiC9jxA5641xPbRB8FwBeCMDNB5/VgN9jvLmcXhqTvr4D9cI9P6Ir7/DDnbcyEe2YOeI72XRz3YDo7cMxrgl2GSDn9AmZiUZWAsOcPhHWYSahIVRh/IWYjrKvZZBmlSwTRJQAISxdk7CobWYYuXXHUA5wARlfJkD1XyawyD1Bk6Rhdpc+Z1lG4Fm+G/1bkEhX8SczlnaXP8Juz5TddEmZvDz4eOQAAAABJRU5ErkJggg==',

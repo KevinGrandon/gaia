@@ -28,8 +28,7 @@ const Homescreen = (function() {
         { name: 'Video' },
         { name: 'FM Radio' },
         { name: 'Email' },
-        { name: 'Pages' },
-        { name: 'OpenSearch' }
+        { name: 'Pages' }
       ]
     },
     {

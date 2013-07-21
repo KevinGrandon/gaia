@@ -168,7 +168,7 @@ var OpenSearch = {
 };
 
 var defaults = {
-/*
+
 'Marketplace': {
     'shortname': 'Mozilla Marketplace',
     'icon': '',
@@ -182,13 +182,12 @@ var defaults = {
     'suggestions': {
       'method': 'get',
       'type': 'application/x-suggestions+json',
-      'template': 'https://marketplace.firefox.com/search',
+      'template': 'http://localhost/marketplace',
       'parameters': {
         'q': '{searchTerms}'
       }
     }
   },
-  */
 
 'EverythingMe': {
     'shortname': 'Everything.Me',

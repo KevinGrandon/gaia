@@ -9,8 +9,15 @@
 	height: calc(100% - 10rem);
 	width: 100%;
 	z-index: 10000;
+	color: #fff;
 }
 
 #smartfolder.open {
 	transform: translate(0, 0);
+}
+
+#smartfolder h2 {
+	padding: 0px 2rem 1rem;
+	border-bottom: 0.1rem solid #ccc;
+	margin-bottom: 1.5rem;
 }

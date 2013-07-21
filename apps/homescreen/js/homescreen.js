@@ -162,7 +162,10 @@ const Homescreen = (function() {
   var openSmartFolder = function() {
     var folderEl = document.getElementById('smartfolder');
     folderEl.classList.add('open');
-    folderEl.innerHTML = this.manifest.query;
+    folderEl.querySelector('.title').innerHTML = this.manifest.name;
+
+    var folderIcons = folderEl.querySelector('.icon-list');
+    folderIcons.innerHTML = 'Loading results for ' + this.manifest.query;
 
     setTimeout(function() {
       window.addEventListener('touchstart', function smartFolderDispatch(e) {

@@ -354,10 +354,10 @@ var Rocketbar = {
 
   visualSearchResults: function rocketbar_visualSearchResults(results, plugin) {
     var resultItem = document.createElement('li');
+    resultItem.className = 'visual';
     var resultTitle = document.createElement('h3');
     resultTitle.textContent = plugin.name + ' Results';
     resultItem.appendChild(resultTitle);
-    resultItem.style.backgroundImage = 'url(' + plugin.icon + ')';
 
     // Render individual results within the element
     results.forEach(function(result) {
@@ -367,7 +367,7 @@ var Rocketbar = {
       }
 
       var resultURL = document.createElement('small');
-      resultURL.className = 'visual-suggestion';
+      resultURL.className = 'suggestion';
       resultURL.innerHTML = '<img height="48" width="48" src="' + result.icon + '">' + result.title;
       resultURL.setAttribute('data-site-url', result.uri);
       resultItem.appendChild(resultURL);

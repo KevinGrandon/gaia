@@ -59,14 +59,14 @@ html, body {
   font-size: 15px;
 }
 
-#icon-list li {
+.icon-list li {
   float: left;
   margin-left: 13px;
   list-style-type: none;
 }
 
 #group-list li.title img,
-#icon-list li.title img {
+.icon-list li.title img {
   width: -moz-calc(100% - 25px);
 }
 

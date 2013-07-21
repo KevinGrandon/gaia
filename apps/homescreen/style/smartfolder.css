@@ -21,3 +21,10 @@
 	border-bottom: 0.1rem solid #ccc;
 	margin-bottom: 1.5rem;
 }
+
+#smartfolder .icon-list {
+	width: 100%;
+	height: calc(100% - 5.5rem);
+	padding: 0;
+	overflow-y: auto;
+}

@@ -4,6 +4,7 @@
 const Homescreen = (function() {
   var mgmt = navigator.mozApps.mgmt;
   var grid = document.getElementById('icongrid');
+  var smartFolder = document.getElementById('smartfolder');
   var page = document.getElementById('landing-page');
   var groupsPage = document.getElementById('groups-page');
   var iconList = document.getElementById('icon-list');
@@ -66,7 +67,10 @@ const Homescreen = (function() {
   
   var gd = new GestureDetector(grid);
   gd.startDetecting();
-  
+
+  var smartFolderDetector = new GestureDetector(smartFolder);
+  smartFolderDetector.startDetecting();
+
   grid.addEventListener('transform', function(e) {
     var scale = e.detail.relative.scale;
     if (scale < 1 && !page.classList.contains('hide')) {
@@ -154,37 +158,66 @@ const Homescreen = (function() {
       createGroup(group.name);
       group.content.forEach(function(application) {
         var entry = application.entry || null;
-        renderIcon(application, entry);
+        renderIcon(application, entry, iconList);
       });
     });
   }
 
   var openSmartFolder = function() {
-    var folderEl = document.getElementById('smartfolder');
-    folderEl.classList.add('open');
-    folderEl.querySelector('.title').innerHTML = this.manifest.name;
+    smartFolder.classList.add('open');
+    smartFolder.querySelector('.title').innerHTML = this.manifest.name;
 
-    var folderIcons = folderEl.querySelector('.icon-list');
-    folderIcons.innerHTML = 'Loading results for ' + this.manifest.query;
+    var folderIcons = smartFolder.querySelector('.icon-list');
 
+    folderIcons.innerHTML = '';
+
+    // Populate open search results
+    var folderContent = '';
+    OpenSearchPlugins.retrieve((function(plugins) {
+      plugins.forEach(function(plugin) {
+        OpenSearchPlugins.getSuggestions(plugin.name, this.manifest.query, 8, renderSuggestions);
+      }, this)
+    }).bind(this));
+
+    function renderSuggestions(results) {
+      results.forEach(function(result) {
+        renderIcon({
+          name: result.title.substring(0, 10),
+          uri: result.uri,
+          icon: 'http://homescreen.gaiamobile.org:8080/style/icons/FoodSearch.png'
+        }, null, folderIcons);
+      });
+  
+    }
+
+    // If a touch event bubbles to the container, close the folder
     setTimeout(function() {
       window.addEventListener('touchstart', function smartFolderDispatch(e) {
+
+        var el = e.target;
+        while(el = el.parentNode) {
+          if (el === folderIcons) {
+            return;
+          }
+        }
+
         window.removeEventListener('touchstart', smartFolderDispatch);
-        folderEl.classList.remove('open');
+        smartFolder.classList.remove('open');
       });
     }, 0);
   };
 
-  var renderIcon = function(application, entryPoint) {
+  var renderIcon = function(application, entryPoint, iconList) {
     if (application.app) {
       var app  = application.app;
     } else {
       var app = { manifest: { name: application.name }};
     }
     
-    if (application.name === "Pages") {
+    if (application.name === "Pages" || application.uri) {
+      application.uri = application.uri || 'about:blank';
       app.launch = function(){
-        window.open('about:blank');
+        window.open(application.uri);
       };
     }
     if(application.type === 'search') {
@@ -199,7 +232,7 @@ const Homescreen = (function() {
       name = app.manifest.name;
     }
     
-    icon = window.location.protocol + '//' + 
+    icon = application.icon || window.location.protocol + '//' + 
       window.location.host + '/style/icons/' + application.name.replace(' ', '') + '.png';
 
     var tile = document.createElement('li');
@@ -228,7 +261,7 @@ const Homescreen = (function() {
     tile.addEventListener('tap', (function(application, entry) {
       return function() {
         application.launch(entry ? entry : null);
-        page.removeEventListener('transitionend', runAppTrans);
+        //page.removeEventListener('transitionend', runAppTrans);
         setTimeout(function() {
           page.classList.remove('show');
         }, 500);

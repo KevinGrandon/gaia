@@ -184,7 +184,7 @@ const Homescreen = (function() {
         renderIcon({
           name: result.title.substring(0, 10),
           uri: result.uri,
-          icon: 'http://homescreen.gaiamobile.org:8080/style/icons/FoodSearch.png'
+          icon: window.location.protocol + '//' +  window.location.host + '/style/icons/FoodSearch.png'
         }, null, folderIcons);
       });
   

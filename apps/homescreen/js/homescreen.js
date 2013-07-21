@@ -159,8 +159,17 @@ const Homescreen = (function() {
     });
   }
 
-  var launchOpenSearch = function() {
-    alert('zomg searching!')
+  var openSmartFolder = function() {
+    var folderEl = document.getElementById('smartfolder');
+    folderEl.classList.add('open');
+    folderEl.innerHTML = this.manifest.query;
+
+    setTimeout(function() {
+      window.addEventListener('touchstart', function smartFolderDispatch(e) {
+        window.removeEventListener('touchstart', smartFolderDispatch);
+        folderEl.classList.remove('open');
+      });
+    }, 0);
   };
 
   var renderIcon = function(application, entryPoint) {
@@ -175,9 +184,9 @@ const Homescreen = (function() {
         window.open('about:blank');
       };
     }
-    
     if(application.type === 'search') {
-      app.launch = launchOpenSearch;
+      app.manifest.query = application.query;
+      app.launch = openSmartFolder;
     }
 
     var name, icon;

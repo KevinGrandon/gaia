@@ -31,6 +31,7 @@ const Homescreen = (function() {
         { name: 'FM Radio' },
         { name: 'Email' },
         { name: 'Pages' },
+        { name: 'Productivity', type: 'search', query: 'productivity' },
         { name: 'Game Search', type: 'search', query: 'game' },
         { name: 'Food Search', type: 'search', query: 'food' }
       ]

@@ -173,9 +173,7 @@ const Homescreen = (function() {
     // Populate open search results
     var folderContent = '';
     OpenSearchPlugins.retrieve((function(plugins) {
-      plugins.forEach(function(plugin) {
-        OpenSearchPlugins.getSuggestions(plugin.name, this.manifest.query, 12, renderSuggestions);
-      }, this)
+      OpenSearchPlugins.getSuggestions('EverythingMe', this.manifest.query, 12, renderSuggestions, true);
     }).bind(this));
 
     function renderSuggestions(results) {

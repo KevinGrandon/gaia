@@ -36,7 +36,7 @@ var OpenSearch = {
     asyncStorage.setItem('opensearch', JSON.stringify(this.plugins));
   },
 
-  getSuggestions: function os_getSuggestions(name, search, count, callback) {
+  getSuggestions: function os_getSuggestions(name, search, count, callback, disallowSelf) {
     debug('getSuggestions');
 
     var plugin = this.plugins[name];
@@ -134,7 +134,7 @@ var OpenSearch = {
           break;
         }
       }
-      if (!found) {
+      if (!found && !disallowSelf) {
         var uri = baseURI.replace('{searchTerms}', search);
         results.push({ 'title': search, 'uri': uri});
       }

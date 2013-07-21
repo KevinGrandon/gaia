@@ -15,6 +15,8 @@ app.get('/everythingme', function(req, res){
         var urls = [];
         var images = [];
         
+        console.log('Got ' + response.response.apps.length + ' everythingme results')
+
         for (var i = 0, each; each = response.response.apps[i]; i++) {
 
             // Hard limit to 12 for now
@@ -46,6 +48,8 @@ app.get('/marketplace', function(req, res){
         var urls = [];
         var images = [];
         
+        console.log('Got ' + response.objects.length + ' marketplace results')
+
         for (var i = 0, each; each = response.objects[i]; i++) {
 
             // Hard limit to 12 for now

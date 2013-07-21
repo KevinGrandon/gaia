@@ -129,7 +129,7 @@ var OpenSearch = {
       // We might want to control this with a parameter
       var found = false;
       for (var i = 0, result; result = results[i]; i++) {
-        if (result.title.toLowerCase() === search.toLowerCase()) {
+        if (result.title && result.title.toLowerCase() === search.toLowerCase()) {
           found = true;
           break;
         }

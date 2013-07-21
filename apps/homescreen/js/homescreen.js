@@ -174,8 +174,8 @@ const Homescreen = (function() {
     // Populate open search results
     var folderContent = '';
     OpenSearchPlugins.retrieve((function(plugins) {
-      OpenSearchPlugins.getSuggestions('EverythingMe', this.manifest.query, 12, renderSuggestions, true);
-      OpenSearchPlugins.getSuggestions('Marketplace', this.manifest.query, 12, renderSuggestions, true);
+      OpenSearchPlugins.getSuggestions('EverythingMe', this.manifest.query, 12, renderSuggestions);
+      OpenSearchPlugins.getSuggestions('Marketplace', this.manifest.query, 12, renderSuggestions);
     }).bind(this));
 
     function renderSuggestions(results) {

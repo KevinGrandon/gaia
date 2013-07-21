@@ -215,7 +215,7 @@ var Rocketbar = {
     var manifestURLs = Object.keys(installedApps);
     manifestURLs.forEach(function(manifestURL) {
       var appName = installedApps[manifestURL].manifest.name.toLowerCase();
-      if (appName.indexOf(query) != -1 &&
+      if (appName.toLowerCase().indexOf(query.toLowerCase()) != -1 &&
           this.HIDDEN_APPS.indexOf(manifestURL) == -1) {
         results.push(manifestURL);
       }

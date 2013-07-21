@@ -36,7 +36,7 @@ var OpenSearch = {
     asyncStorage.setItem('opensearch', JSON.stringify(this.plugins));
   },
 
-  getSuggestions: function os_getSuggestions(name, search, count, callback, disallowSelf) {
+  getSuggestions: function os_getSuggestions(name, search, count, callback) {
     debug('getSuggestions');
 
     var plugin = this.plugins[name];
@@ -129,12 +129,12 @@ var OpenSearch = {
       // We might want to control this with a parameter
       var found = false;
       for (var i = 0, result; result = results[i]; i++) {
-        if (result.title === search) {
+        if (result.title.toLowerCase() === search.toLowerCase()) {
           found = true;
           break;
         }
       }
-      if (!found && !disallowSelf) {
+      if (!found && suggestions.includeSelf) {
         var uri = baseURI.replace('{searchTerms}', search);
         results.push({ 'title': search, 'uri': uri});
       }
@@ -180,6 +180,7 @@ var defaults = {
       'template': 'https://marketplace.firefox.com/search?q={searchTerms}'
     },
     'suggestions': {
+      'includeSelf': false,
       'method': 'get',
       'type': 'application/x-suggestions+json',
       'template': 'http://localhost/marketplace',
@@ -200,6 +201,7 @@ var defaults = {
       'template': 'http://localhost/everythingme/?q={searchTerms}'
     },
     'suggestions': {
+      'includeSelf': false,
       'method': 'get',
       'type': 'application/x-suggestions+json',
       'template': 'http://localhost/everythingme',
@@ -220,6 +222,7 @@ var defaults = {
       'template': 'http://www.bing.com/search?q={searchTerms}&FORM=MO0001'
     },
     'suggestions': {
+      'includeSelf': true,
       'method': 'get',
       'type': 'application/x-suggestions+json',
       'template': 'http://api.bing.com/osjson.aspx',
@@ -242,6 +245,7 @@ var defaults = {
     },
 
     'suggestions': {
+      'includeSelf': true,
       'method': 'get',
       'type': 'application/x-suggestions+json',
       'template': 'http://en.wikipedia.org/w/api.php',
@@ -264,6 +268,7 @@ var defaults = {
     },
 
    'suggestions': {
+      'includeSelf': true,
       'method': 'get',
       'type': 'application/x-suggestions+json',
       'template': 'http://api.bing.com/osjson.aspx',
@@ -286,6 +291,7 @@ var defaults = {
     },
 
    'suggestions': {
+      'includeSelf': true,
       'method': 'get',
       'type': 'application/x-suggestions+xml',
       'template': 'http://google.com/complete/search',

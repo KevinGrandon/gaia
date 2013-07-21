@@ -23,7 +23,10 @@ app.get('/everythingme', function(req, res){
 
             suggestions.push(each.name);
             urls.push(each.appUrl);
-            images.push('data:image/x-icon;base64,' + each.icon.data);
+            if (each.icon && each.icon.data)
+                images.push('data:image/x-icon;base64,' + each.icon.data);
+            else
+                images.push('');
         }
 
         var openSearchResult = [query, suggestions, urls, images];

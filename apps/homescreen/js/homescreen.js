@@ -28,7 +28,9 @@ const Homescreen = (function() {
         { name: 'Video' },
         { name: 'FM Radio' },
         { name: 'Email' },
-        { name: 'Pages' }
+        { name: 'Pages' },
+        { name: 'Game Search', type: 'search', query: 'game' },
+        { name: 'Food Search', type: 'search', query: 'food' }
       ]
     },
     {
@@ -157,6 +159,10 @@ const Homescreen = (function() {
     });
   }
 
+  var launchOpenSearch = function() {
+    alert('zomg searching!')
+  };
+
   var renderIcon = function(application, entryPoint) {
     if (application.app) {
       var app  = application.app;
@@ -170,6 +176,10 @@ const Homescreen = (function() {
       };
     }
     
+    if(application.type === 'search') {
+      app.launch = launchOpenSearch;
+    }
+
     var name, icon;
     if (entryPoint !== null) {
       name = app.manifest.entry_points[entryPoint].name;

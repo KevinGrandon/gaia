@@ -76,10 +76,27 @@ var OpenSearch = {
           var results = [];
           var baseURI = plugin.url.template;
           var keywords = json[1];
+
+          var urls = json[2] || [];
+          var images = json[3] || [];
+
           var limit = Math.min(count || keywords.length);
           for (var i = 0; i < limit; i++) {
             var uri = baseURI.replace('{searchTerms}', keywords[i]);
-            results.push({ 'title': keywords[i], 'uri': uri});
+            var thisResult = {
+              title: keywords[i],
+              uri: uri,
+            };
+
+            if (urls[i]) {
+              thisResult.uri = urls[i];
+            }
+
+            if (images[i]) {
+              thisResult.icon = images[i];
+            }
+
+            results.push(thisResult);
           }
           break;
 
@@ -172,6 +189,26 @@ var defaults = {
     }
   },
   */
+
+'EverythingMe': {
+    'shortname': 'Everything.Me',
+    'icon': '',
+    'description': 'Everything.Me opensearch plugin',
+    'encoding': 'UTF-8',
+    'url': {
+      'method': 'get',
+      'type': 'text/html',
+      'template': 'http://localhost/everythingme/?q={searchTerms}'
+    },
+    'suggestions': {
+      'method': 'get',
+      'type': 'application/x-suggestions+json',
+      'template': 'http://localhost/everythingme',
+      'parameters': {
+        'q': '{searchTerms}'
+      }
+    }
+  },
 
   'Bing': {
     'shortname': 'Bing',

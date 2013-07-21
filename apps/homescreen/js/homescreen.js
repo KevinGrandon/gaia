@@ -174,7 +174,7 @@ const Homescreen = (function() {
     var folderContent = '';
     OpenSearchPlugins.retrieve((function(plugins) {
       plugins.forEach(function(plugin) {
-        OpenSearchPlugins.getSuggestions(plugin.name, this.manifest.query, 8, renderSuggestions);
+        OpenSearchPlugins.getSuggestions(plugin.name, this.manifest.query, 12, renderSuggestions);
       }, this)
     }).bind(this));
 
@@ -183,7 +183,7 @@ const Homescreen = (function() {
         renderIcon({
           name: result.title.substring(0, 10),
           uri: result.uri,
-          icon: window.location.protocol + '//' +  window.location.host + '/style/icons/FoodSearch.png'
+          icon: result.icon || window.location.protocol + '//' +  window.location.host + '/style/icons/FoodSearch.png'
         }, null, folderIcons);
       });
   

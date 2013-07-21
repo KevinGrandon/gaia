@@ -108,6 +108,19 @@
   line-height: 1.7rem;
 }
 
+#rocketbar-results li small.visual-suggestion {
+  display: inline-block;
+  width: 60px;
+  height: 64px;
+  margin-right: 0.3rem;
+  text-align: center;
+}
+
+#rocketbar-results li small.visual-suggestion img {
+  display: block;
+  margin: 0 auto;
+}
+
 #progress {
   position: absolute;
   width: 100%;

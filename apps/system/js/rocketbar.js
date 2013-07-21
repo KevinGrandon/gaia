@@ -227,7 +227,11 @@ var Rocketbar = {
       var LIMIT = 4;
       OpenSearchPlugins.getSuggestions(plugin.name, query, LIMIT, 
         verifyQuery(function(results) {
-          this.showSearchResults(results, plugin);
+          if (plugin.name == 'EverythingMe' || plugin.name == 'Marketplace') {
+            this.visualSearchResults(results, plugin);
+          } else {
+            this.showSearchResults(results, plugin);
+          }
         })
       );
     }, this);
@@ -341,6 +345,30 @@ var Rocketbar = {
       var resultURL = document.createElement('small');
       resultURL.className = 'suggestion';
       resultURL.textContent = result.title;
+      resultURL.setAttribute('data-site-url', result.uri);
+      resultItem.appendChild(resultURL);
+    }, this);
+
+    this.results.appendChild(resultItem);
+  },
+
+  visualSearchResults: function rocketbar_visualSearchResults(results, plugin) {
+    var resultItem = document.createElement('li');
+    var resultTitle = document.createElement('h3');
+    resultTitle.textContent = plugin.name + ' Results';
+    resultItem.appendChild(resultTitle);
+    resultItem.style.backgroundImage = 'url(' + plugin.icon + ')';
+
+    // Render individual results within the element
+    results.forEach(function(result) {
+
+      if (!result.title || !result.uri) {
+        return;
+      }
+
+      var resultURL = document.createElement('small');
+      resultURL.className = 'visual-suggestion';
+      resultURL.innerHTML = '<img height="48" width="48" src="' + result.icon + '">' + result.title;
       resultURL.setAttribute('data-site-url', result.uri);
       resultItem.appendChild(resultURL);
     }, this);

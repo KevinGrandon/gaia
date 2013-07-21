@@ -5,6 +5,7 @@ const Homescreen = (function() {
   var mgmt = navigator.mozApps.mgmt;
   var grid = document.getElementById('icongrid');
   var smartFolder = document.getElementById('smartfolder');
+  var folderIcons = smartFolder.querySelector('.icon-list');
   var page = document.getElementById('landing-page');
   var groupsPage = document.getElementById('groups-page');
   var iconList = document.getElementById('icon-list');
@@ -167,8 +168,6 @@ const Homescreen = (function() {
     smartFolder.classList.add('open');
     smartFolder.querySelector('.title').innerHTML = this.manifest.name;
 
-    var folderIcons = smartFolder.querySelector('.icon-list');
-
     folderIcons.innerHTML = '';
 
     // Populate open search results
@@ -190,20 +189,18 @@ const Homescreen = (function() {
   
     }
 
-    // If a touch event bubbles to the container, close the folder
+    // Set a listener to close the smart folder
     setTimeout(function() {
-      window.addEventListener('touchstart', function smartFolderDispatch(e) {
-
-        var el = e.target;
-        while(el = el.parentNode) {
-          if (el === folderIcons) {
-            return;
-          }
-        }
-
-        window.removeEventListener('touchstart', smartFolderDispatch);
+      function closeSmartFolder(e) {
+        window.removeEventListener('tap', closeSmartFolder);
+        folderIcons.removeEventListener('tap', checkFolderIcons);
         smartFolder.classList.remove('open');
-      });
+      }
+      function checkFolderIcons(e) {
+        e.stopPropagation();
+      }
+      window.addEventListener('tap', closeSmartFolder);
+      folderIcons.addEventListener('tap', checkFolderIcons);
     }, 0);
   };
 

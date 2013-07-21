@@ -66,6 +66,6 @@ app.get('/marketplace', function(req, res){
     })
 });
 
-app.listen(80);
+app.listen(8080);
 
-console.log('Server running at http://localhost:80/');
+console.log('Server running at http://localhost:8080/');

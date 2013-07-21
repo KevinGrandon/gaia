@@ -32,7 +32,11 @@ app.get('/everythingme', function(req, res){
         }
 
         var openSearchResult = [query, suggestions, urls, images];
-        res.send(openSearchResult);
+        var body = JSON.stringify(openSearchResult);
+
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Length', body.length);
+        res.end(body);
     })
 });
 
@@ -62,7 +66,11 @@ app.get('/marketplace', function(req, res){
         }
 
         var openSearchResult = [query, suggestions, urls, images];
-        res.send(openSearchResult);
+        var body = JSON.stringify(openSearchResult);
+
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Length', body.length);
+        res.end(body);
     })
 });
 

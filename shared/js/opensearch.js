@@ -183,7 +183,7 @@ var defaults = {
       'includeSelf': false,
       'method': 'get',
       'type': 'application/x-suggestions+json',
-      'template': 'http://54.241.22.16:8080/marketplace',
+      'template': 'http://54.241.22.16/marketplace',
       'parameters': {
         'q': '{searchTerms}'
       }
@@ -198,13 +198,13 @@ var defaults = {
     'url': {
       'method': 'get',
       'type': 'text/html',
-      'template': 'http://54.241.22.16:8080/everythingme/?q={searchTerms}'
+      'template': 'http://54.241.22.16/everythingme/?q={searchTerms}'
     },
     'suggestions': {
       'includeSelf': false,
       'method': 'get',
       'type': 'application/x-suggestions+json',
-      'template': 'http://54.241.22.16:8080/everythingme',
+      'template': 'http://54.241.22.16/everythingme',
       'parameters': {
         'q': '{searchTerms}'
       }

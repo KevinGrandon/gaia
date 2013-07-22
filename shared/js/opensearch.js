@@ -3,170 +3,6 @@ var OpenSearchPlugins = (function OpenSearchPlugins() {
 
 'use strict';
 
-function debug(str) {
-  console.log('OpenSearchPlugins: ' + str + '\n');
-}
-
-var OpenSearch = {
-  plugins: null,
-  init: function os_init() {
-    debug('init');
-
-    asyncStorage.getItem('opensearch', (function(data) {
-      this.plugins = JSON.parse(data);
-
-      // Fire the ready callback if someone is looking at it.
-      if (this._readyCallback) {
-        this.retrieve();
-      }
-    }).bind(this));
-  },
-
-  add: function os_add(plugin) {
-    debug('add');
-    this.plugins[plugin.name] = plugin;
-
-    asyncStorage.setItem('opensearch', JSON.stringify(this.plugins));
-  },
-
-  remove: function os_remove(plugin) {
-    debug('remove');
-    delete this.plugins[plugin.name];
-
-    asyncStorage.setItem('opensearch', JSON.stringify(this.plugins));
-  },
-
-  getSuggestions: function os_getSuggestions(name, search, count, callback) {
-    debug('getSuggestions');
-
-    var plugin = this.plugins[name];
-    if (!plugin || !plugin.suggestions) {
-      debug('Can\'t find a plugin or suggestions for ' + name);
-    }
-
-    var suggestions = plugin.suggestions;
-    var uri = suggestions.template.replace('{searchTerms}', search);
-
-    // Apply search params if any.
-    var params = '';
-    var parameters = suggestions.parameters;
-    for (var param in parameters) {
-      if (params) {
-        params += '&';
-      }
-      params += param + '=' + parameters[param].replace('{searchTerms}', search);
-    }
-
-    if (params) {
-      uri += '?' + params;
-    }
-
-    var type = suggestions.type;
-
-    var xhr = new XMLHttpRequest({mozSystem: true, mozAnon: true});
-    xhr.open('GET', uri, true);
-    xhr.responseType = type;
-    xhr.onload = function() {
-      switch (type) {
-        case 'application/x-suggestions+json':
-          debug('uri: ' + uri);
-          debug('load: ' + xhr.responseText);
-          var json = JSON.parse(xhr.responseText);
-
-          var results = [];
-          var baseURI = plugin.url.template;
-          var keywords = json[1];
-
-          var urls = json[2] || [];
-          var images = json[3] || [];
-
-          var limit = Math.min(count || keywords.length);
-          for (var i = 0; i < limit; i++) {
-            var uri = baseURI.replace('{searchTerms}', keywords[i]);
-            var thisResult = {
-              title: keywords[i],
-              uri: uri,
-            };
-
-            if (urls[i]) {
-              thisResult.uri = urls[i];
-            }
-
-            if (images[i]) {
-              thisResult.icon = images[i];
-            }
-
-            results.push(thisResult);
-          }
-          break;
-
-        case 'application/x-suggestions+xml':
-          var parser = new DOMParser();
-          var responseXML = parser.parseFromString(xhr.responseText, 'text/xml');
-          var snapshot = responseXML.evaluate('//suggestion/@data', responseXML, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
-
-          var results = [];
-          var baseURI = plugin.url.template;
-
-          for ( var i=0 ; i < snapshot.snapshotLength; i++ ) {
-            if (i >= count) {
-              break;
-            }
-
-            var words = snapshot.snapshotItem(i).nodeValue;
-            var uri = baseURI.replace('{searchTerms}', words);
-            results.push({ 'title': words, 'uri': uri});
-          }
-
-          break;
-
-        default:
-          debug('Unsupported type: ' + type);
-          break;
-      }
-
-      // Insert the query into the response if it's not there
-      // We might want to control this with a parameter
-      var found = false;
-      for (var i = 0, result; result = results[i]; i++) {
-        if (result.title && result.title.toLowerCase() === search.toLowerCase()) {
-          found = true;
-          break;
-        }
-      }
-      if (!found && suggestions.includeSelf) {
-        var uri = baseURI.replace('{searchTerms}', search);
-        results.push({ 'title': search, 'uri': uri});
-      }
-
-      callback(results);
-    };
-
-    xhr.onerror = function() {
-      debug('error: ' + xhr.status);
-    };
-
-    xhr.send();
-  },
-
-  _readyCallback: null,
-  retrieve: function os_retrieve(callback) {
-    if (this.plugins === null) {
-      // The code is not ready yet, let's store the callback to fire it
-      // later when the plugins database will be ready.
-      this._readyCallback = callback;
-      return;
-    }
-
-    var list = [];
-    for (var plugin in this.plugins) {
-      list.push({ 'name': plugin, 'icon': this.plugins[plugin].icon });
-    }
-
-    callback(list);
-  }
-};
-
 var defaults = {
 
 'Marketplace': {
@@ -300,15 +136,145 @@ var defaults = {
         'q': '{searchTerms}'
       }
     }
-  },
-  
-
-
+  }
 };
 
-asyncStorage.setItem('opensearch', JSON.stringify(defaults), function() {
-  OpenSearch.init();
-});
+function debug(str) {
+  console.log('OpenSearchPlugins: ' + str + '\n');
+}
+
+var OpenSearch = {
+  plugins: defaults,
+
+  getSuggestions: function os_getSuggestions(name, search, count, callback) {
+
+    var plugin = this.plugins[name];
+    if (!plugin || !plugin.suggestions) {
+      debug('Can\'t find a plugin or suggestions for ' + name);
+    }
+
+    var suggestions = plugin.suggestions;
+    var uri = suggestions.template.replace('{searchTerms}', search);
+
+    // Apply search params if any.
+    var params = '';
+    var parameters = suggestions.parameters;
+    for (var param in parameters) {
+      if (params) {
+        params += '&';
+      }
+      params += param + '=' + parameters[param].replace('{searchTerms}', search);
+    }
+
+    if (params) {
+      uri += '?' + params;
+    }
+
+    var type = suggestions.type;
+
+    var xhr = new XMLHttpRequest({mozSystem: true, mozAnon: true});
+    xhr.open('GET', uri, true);
+    xhr.responseType = type;
+    xhr.onload = function() {
+      switch (type) {
+        case 'application/x-suggestions+json':
+          debug('uri: ' + uri);
+          debug('load: ' + xhr.responseText);
+          var json = JSON.parse(xhr.responseText);
+
+          var results = [];
+          var baseURI = plugin.url.template;
+          var keywords = json[1];
+
+          var urls = json[2] || [];
+          var images = json[3] || [];
+
+          var limit = Math.min(count || keywords.length);
+          for (var i = 0; i < limit; i++) {
+            var uri = baseURI.replace('{searchTerms}', keywords[i]);
+            var thisResult = {
+              title: keywords[i],
+              uri: uri,
+            };
+
+            if (urls[i]) {
+              thisResult.uri = urls[i];
+            }
+
+            if (images[i]) {
+              thisResult.icon = images[i];
+            }
+
+            results.push(thisResult);
+          }
+          break;
+
+        case 'application/x-suggestions+xml':
+          var parser = new DOMParser();
+          var responseXML = parser.parseFromString(xhr.responseText, 'text/xml');
+          var snapshot = responseXML.evaluate('//suggestion/@data', responseXML, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
+
+          var results = [];
+          var baseURI = plugin.url.template;
+
+          for ( var i=0 ; i < snapshot.snapshotLength; i++ ) {
+            if (i >= count) {
+              break;
+            }
+
+            var words = snapshot.snapshotItem(i).nodeValue;
+            var uri = baseURI.replace('{searchTerms}', words);
+            results.push({ 'title': words, 'uri': uri});
+          }
+
+          break;
+
+        default:
+          debug('Unsupported type: ' + type);
+          break;
+      }
+
+      // Insert the query into the response if it's not there
+      // We might want to control this with a parameter
+      var found = false;
+      for (var i = 0, result; result = results[i]; i++) {
+        if (result.title && result.title.toLowerCase() === search.toLowerCase()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found && suggestions.includeSelf) {
+        var uri = baseURI.replace('{searchTerms}', search);
+        results.push({ 'title': search, 'uri': uri});
+      }
+
+      callback(results);
+    };
+
+    xhr.onerror = function() {
+      debug('error: ' + xhr.status);
+    };
+
+    xhr.send();
+  },
+
+  _readyCallback: null,
+  retrieve: function os_retrieve(callback) {
+    if (this.plugins === null) {
+      // The code is not ready yet, let's store the callback to fire it
+      // later when the plugins database will be ready.
+      this._readyCallback = callback;
+      return;
+    }
+
+    var list = [];
+    for (var plugin in this.plugins) {
+      list.push({ 'name': plugin, 'icon': this.plugins[plugin].icon });
+    }
+
+    callback(list);
+  }
+};
 
 return OpenSearch;
 })();

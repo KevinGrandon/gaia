@@ -77,3 +77,7 @@ app.get('/marketplace', function(req, res){
 app.listen(8080);
 
 console.log('Server running at http://localhost:8080/');
+
+process.on('uncaughtException', function (error) {
+    console.log(error.stack);
+});

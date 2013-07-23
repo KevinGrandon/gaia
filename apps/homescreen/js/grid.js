@@ -722,7 +722,7 @@ var GridManager = (function() {
       // If the new page is situated right after the current displayed page,
       // makes it visible and move it to the right place.
       if (currentPage == pages.length - 2) {
-        goToPage(currentPage);
+        //goToPage(currentPage);
       }
 
       updatePaginationBar();
@@ -837,17 +837,6 @@ var GridManager = (function() {
     return bookmarkIcons[bookmarkURL];
   }
 
-  // Ways to enumerate installed apps & bookmarks and find out whether
-  // a certain "origin" is available as an existing installed app or
-  // bookmark. Only used by Everything.me at this point.
-  function getApps() {
-    var apps = [];
-    for (var origin in appsByOrigin) {
-      apps.push(appsByOrigin[origin]);
-    }
-    return apps;
-  }
-
   function getAppByOrigin(url) {
     return appsByOrigin[url];
   }
@@ -917,6 +906,21 @@ var GridManager = (function() {
         delete iconsByManifestURL[app.manifestURL];
         processApp(app);
       });
+
+      // Hack to add in smart folders
+      pages[1].appendIcon(new SmartFolderIcon({
+        icon: '///' + window.location.host + '/style/icons/smartfolder.png',
+        type: 'smartfolder',
+        title: 'Games',
+        query: 'game'
+      }));
+
+      pages[1].appendIcon(new SmartFolderIcon({
+        icon: '///' + window.location.host + '/style/icons/smartfolder.png',
+        type: 'smartfolder',
+        title: 'Productivity',
+        query: 'productivity'
+      }));
 
       for (var origin in bookmarksByOrigin) {
         appsByOrigin[origin] = bookmarksByOrigin[origin];
@@ -1292,8 +1296,6 @@ var GridManager = (function() {
     getIconsForApp: getIconsForApp,
 
     getIconForBookmark: getIconForBookmark,
-
-    getApps: getApps,
 
     getAppByOrigin: getAppByOrigin,
 

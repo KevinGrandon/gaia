@@ -9,7 +9,7 @@ var Rocketbar = {
   DOM: {},
   installedApps: {},
 
-  init: function rocketbar_init() {
+  init: function() {
     this.getInstalledApps();
 
     this.nodeNames.forEach(function(name) {
@@ -28,7 +28,7 @@ var Rocketbar = {
 
   getInstalledApps: function() {
     var self = this;
-    navigator.mozApps.mgmt.getAll().onsuccess = function mozAppGotAll(evt) {
+    navigator.mozApps.mgmt.getAll().onsuccess = function(evt) {
       var apps = evt.target.result;
       apps.forEach(function(app) {
         self.installedApps[app.manifestURL] = app;
@@ -36,7 +36,7 @@ var Rocketbar = {
     };
   },
 
-  toCamelCase: function toCamelCase(str) {
+  toCamelCase: function(str) {
      return str.replace(/\-(.)/g, function replacer(str, p1) {
        return p1.toUpperCase();
      });
@@ -44,11 +44,13 @@ var Rocketbar = {
 
   handleClick: function(evt) {
     var target = evt.target;
-     var manifestURL = target.getAttribute('data-manifest-url');
-     if (manifestURL && this.installedApps[manifestURL]) {
-       this.installedApps[manifestURL].launch();
-     }
-     this.hide();
+    var manifestURL = target.getAttribute('data-manifest-url');
+    var entryPoint = target.getAttribute('data-entry-point');
+
+    if (manifestURL && this.installedApps[manifestURL]) {
+       this.installedApps[manifestURL].launch(entryPoint);
+    }
+    this.hide();
   },
 
   handleHashChange: function(evt) {
@@ -74,27 +76,54 @@ var Rocketbar = {
     // Create a list of manifestURLs for apps with names which match the query
     var manifestURLs = Object.keys(this.installedApps);
     manifestURLs.forEach(function(manifestURL) {
-      var appName = this.installedApps[manifestURL].manifest.name.toLowerCase();
-      if (appName.indexOf(query.toLowerCase()) != -1 &&
-          this.HIDDEN_APPS.indexOf(manifestURL) == -1) {
-        results.push(manifestURL);
+
+      if (this.HIDDEN_APPS.indexOf(manifestURL) !== -1)
+        return;
+
+      var app = this.installedApps[manifestURL];
+      var manifest = app.manifest;
+
+      var appListing = [];
+
+      if (manifest.entry_points) {
+        for (var i in manifest.entry_points) {
+          manifest.entry_points[i].entryPoint = i;
+          appListing.push(manifest.entry_points[i]);
+        }
       }
+      appListing.push(manifest);
+
+      appListing.forEach(function(manifest) {
+        if (manifest.name.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+          results.push({
+            manifestURL: manifestURL,
+            app: app,
+            manifest: manifest,
+            entryPoint: manifest.entryPoint
+          });
+        }
+      });
     }, this);
     this.showAppResults(results);
   },
 
-  showAppResults: function rocketbar_showAppResults(results) {
+  showAppResults: function(results) {
     this.DOM.results.innerHTML = '';
     if (results.length == 0)
       return;
-    results.forEach(function(manifestURL) {
-      var app = this.installedApps[manifestURL];
+    results.forEach(function(result) {
+      var app = result.app;
       var li = document.createElement('li');
-      li.textContent = app.manifest.name;
-      li.setAttribute('data-manifest-url', manifestURL);
-      if (app.manifest.icons) {
+      li.textContent = result.manifest.name;
+      li.setAttribute('data-manifest-url', result.manifestURL);
+
+      if (result.entryPoint) {
+        li.setAttribute('data-entry-point', result.entryPoint);
+      }
+
+      if (result.manifest.icons) {
         li.style.backgroundImage = 'url(' + app.origin +
-          app.manifest.icons['60'] + ')';
+          result.manifest.icons['60'] + ')';
       }
       this.DOM.results.appendChild(li);
     }, this);
@@ -117,20 +146,14 @@ var Rocketbar = {
     }.bind(this), 200);
   },
 
-  HIDDEN_APPS: ['app://keyboard.gaiamobile.org/manifest.webapp',
-      'app://wallpaper.gaiamobile.org/manifest.webapp',
-      'app://bluetooth.gaiamobile.org/manifest.webapp',
-      'app://pdfjs.gaiamobile.org/manifest.webapp',
-      'app://homescreen.gaiamobile.org/manifest.webapp',
-      'app://system.gaiamobile.org/manifest.webapp',
-      'app://image-uploader.gaiamobile.org/manifest.webapp',
-      'http://keyboard.gaiamobile.org:8080/manifest.webapp',
-      'http://wallpaper.gaiamobile.org:8080/manifest.webapp',
-      'http://bluetooth.gaiamobile.org:8080/manifest.webapp',
-      'http://pdfjs.gaiamobile.org:8080/manifest.webapp',
-      'http://homescreen.gaiamobile.org:8080/manifest.webapp',
-      'http://system.gaiamobile.org:8080/manifest.webapp',
-      'http://image-uploader.gaiamobile.org/manifest.webapp']
+  HIDDEN_APPS: ['keyboard.gaiamobile.org/manifest.webapp',
+      'wallpaper.gaiamobile.org/manifest.webapp',
+      'bluetooth.gaiamobile.org/manifest.webapp',
+      'pdfjs.gaiamobile.org/manifest.webapp',
+      'homescreen.gaiamobile.org/manifest.webapp',
+      'system.gaiamobile.org/manifest.webapp',
+      'image-uploader.gaiamobile.org/manifest.webapp'
+  ]
 };
 
 Rocketbar.init();

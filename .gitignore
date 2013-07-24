@@ -33,6 +33,8 @@ manifest.appcache
 /showcase_apps/*/test/unit/_proxy.html
 /showcase_apps/*/locales-obj
 
+shared/js/opensearch.js
+
 /profile/
 /profile-debug/
 /profile.tar.gz

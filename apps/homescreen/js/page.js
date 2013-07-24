@@ -217,8 +217,8 @@ Page.prototype = {
                !this.olist.getAttribute('disabled')) {
       var icon = GridManager.getIcon(elem.dataset);
 
-      if (!icon && elem.dataset.type === 'smartfolder') {
-        var folder = new SmartFolder(elem);
+      if (icon.descriptor && icon.descriptor.type === 'folder') {
+        var folder = new SmartFolder(icon.descriptor);
         folder.show();
         return;
       }

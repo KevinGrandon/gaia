@@ -7,8 +7,8 @@
   var gd = new GestureDetector(folder);
   gd.startDetecting();
 
-  function SmartFolder(elem) {
-    this.data = elem.dataset;
+  function SmartFolder(descriptor) {
+    this.data = descriptor;
     this.query = this.data.query;
   }
 

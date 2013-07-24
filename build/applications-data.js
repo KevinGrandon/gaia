@@ -3,6 +3,7 @@
 const PREFERRED_ICON_SIZE = 60;
 const GAIA_CORE_APP_SRCDIR = 'apps';
 const GAIA_EXTERNAL_APP_SRCDIR = 'external-apps';
+const SMART_FOLDER = 'smart_folder';
 const INSTALL_TIME = 132333986000; // Match this to value in webapp-manifests.js
 
 // Initial Homescreen icon descriptors.
@@ -43,6 +44,20 @@ function bestMatchingIcon(preferred_size, manifest, origin) {
     return url;
 
   return origin + url;
+}
+
+function smartFolderDescriptor(type, name, query) {
+  let origin = gaiaOriginURL('homescreen');
+
+  return {
+    type: 'folder',
+    manifestURL: origin + '/manifest.webapp',
+    entry_point: name + '-' + query,
+    updateTime: INSTALL_TIME,
+    name: name,
+    query: query,
+    icon: origin + '/style/icons/smartfolder.png'
+  };
 }
 
 function iconDescriptor(directory, app_name, entry_point) {
@@ -117,7 +132,9 @@ let customize = {'homescreens': [
     ['apps', 'gallery'],
     ['apps', 'fm'],
     ['apps', 'settings'],
-    [GAIA_EXTERNAL_APP_SRCDIR, 'marketplace.firefox.com']
+    [GAIA_EXTERNAL_APP_SRCDIR, 'marketplace.firefox.com'],
+    [SMART_FOLDER, 'Games', 'games'],
+    [SMART_FOLDER, 'Productivity', 'productivity']
   ], [
     ['apps', 'calendar'],
     ['apps', 'clock'],
@@ -176,7 +193,11 @@ let content = {
       var output = [];
       for (var i = 0; i < applist.length; i++) {
         if (applist[i] !== null) {
-          output.push(iconDescriptor.apply(null, applist[i]));
+          if (applist[i][0] === SMART_FOLDER) {
+            output.push(smartFolderDescriptor.apply(null, applist[i]));
+          } else {
+            output.push(iconDescriptor.apply(null, applist[i]));
+          }
         }
       }
       return output;

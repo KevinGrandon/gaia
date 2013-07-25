@@ -12,7 +12,7 @@ var Rocketbar = {
   installedApps: {},
 
   plugins: null,
-  
+
   init: function() {
     this.getInstalledApps();
 
@@ -20,9 +20,9 @@ var Rocketbar = {
       this.DOM[this.toCamelCase(name)] =
         document.getElementById('rocketbar-' + name);
     }, this);
-    
+
     this.plugins = OpenSearchPlugins.plugins;
-    
+
     this.DOM.activationIcon.addEventListener('click',
       this.show.bind(this, true)
     );
@@ -89,18 +89,18 @@ var Rocketbar = {
 
     this.DOM.searchResults.innerHTML = '';
     this.DOM.appsResults.innerHTML = '';
-    
+
     // If the user is typing quickly, we may request multiple async results
     // This function verifies that the current query matches the desired query
     this.lastQuery = query;
-    var verifyQuery = function(callback) {
+    var verifyQuery = (function(callback) {
       return function() {
         if (this.lastQuery === query) {
           callback.apply(this, arguments);
         }
       }.bind(this);
-    }.bind(this);
-    
+    }).bind(this);
+
     // Create a list of manifestURLs for apps with names which match the query
     var manifestURLs = Object.keys(this.installedApps);
     manifestURLs.forEach(function(manifestURL) {
@@ -133,7 +133,7 @@ var Rocketbar = {
       });
     }, this);
     this.showAppResults(results);
-    
+
     for (var name in this.plugins) {
       var plugin = this.plugins[name];
       var LIMIT = 12;
@@ -145,7 +145,7 @@ var Rocketbar = {
             } else {
               this.showSearchResults(results, _plugin);
             }
-          })
+          });
         })(name, plugin)
       );
     }
@@ -195,7 +195,7 @@ var Rocketbar = {
     }, this);
     this.DOM.searchResults.appendChild(resultItem);
   },
-  
+
   visualSearchResults: function rocketbar_visualSearchResults(results, plugin) {
     var resultItem = document.createElement('li');
     resultItem.className = 'visual';
@@ -212,10 +212,8 @@ var Rocketbar = {
 
       var resultURL = document.createElement('small');
       resultURL.className = 'suggestion';
-      resultURL.innerHTML = 
-        '<img height="48" width="48" src="' + 
-        result.icon + 
-        '">' + 
+      resultURL.innerHTML =
+        '<img height="48" width="48" src="' + result.icon + '">' +
         result.title;
       resultURL.setAttribute('data-site-url', result.uri);
       resultItem.appendChild(resultURL);
@@ -223,18 +221,20 @@ var Rocketbar = {
 
     this.DOM.appsResults.appendChild(resultItem);
   },
-    
+
   tabClickHandler: function(evt) {
     // disable active tab & tabpanel
-    Array.prototype.slice.call(document.querySelectorAll('.active')).forEach(function(element){
-      element.classList.remove('active');
+    Array.prototype.slice.call(
+      this.DOM.overlay.querySelectorAll('.active')
+    ).forEach(function(element) {
+        element.classList.remove('active');
     });
-    
+
     // make the new one active
     evt.target.classList.add('active');
     this.DOM[evt.target.dataset.tabId].classList.add('active');
   },
-  
+
   show: function(focus) {
     this.DOM.overlay.classList.add('visible');
     if (focus) {

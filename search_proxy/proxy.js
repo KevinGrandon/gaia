@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var everythingme = require(__dirname + '/lib/everythingme.js');
 var marketplace = require(__dirname + '/lib/marketplace.js');
+var yelp = require(__dirname + '/lib/yelp.js');
 
 app.get('/everythingme', function(req, res){
     var query = req.query.q;
@@ -74,9 +75,43 @@ app.get('/marketplace', function(req, res){
     })
 });
 
-app.listen(8080);
 
-console.log('Server running at http://localhost:8080/');
+app.get('/yelp', function(req, res){
+    var query = req.query.q;
+
+    console.log('Got yelp request for: ', query)
+
+    yelp.request(query, function(response) {
+
+        var suggestions = [];
+        var urls = [];
+        var images = [];
+        
+        console.log('Got ' + response.businesses.length + ' yelp results')
+
+        for (var i = 0, each; each = response.businesses[i]; i++) {
+
+            // Hard limit to 12 for now
+            if (i >= 12)
+                break;
+
+            suggestions.push(each.name);
+            urls.push(each.mobile_url);
+            images.push(each.image_url);
+        }
+
+        var openSearchResult = [query, suggestions, urls, images];
+        var body = JSON.stringify(openSearchResult);
+
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Length', body.length);
+        res.end(body);
+    })
+});
+
+app.listen(80);
+
+console.log('Server running at http://localhost:80/');
 
 process.on('uncaughtException', function (error) {
     console.log(error.stack);

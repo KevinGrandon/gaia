@@ -5,6 +5,29 @@ var OpenSearchPlugins = (function OpenSearchPlugins() {
 
 var defaults = {
 
+'Yelp': {
+    'shortname': 'Yelp',
+    'icon': '',
+    'description': 'Yelp opensearch plugin',
+    'encoding': 'UTF-8',
+    'url': {
+      'method': 'get',
+      'type': 'text/html',
+      'template': 'http://www.yelp.com/search?find_desc={searchTerms}&src=firefox&find_loc={geo:name}'
+    },
+    'suggestions': {
+      'includeSelf': false,
+      'method': 'get',
+      'type': 'application/x-suggestions+json',
+      //'template': 'http://54.241.22.16/yelp',
+      'template': 'http://localhost/yelp',
+      'parameters': {
+        'q': '{searchTerms}',
+        'loc': '{geo:name}'
+      }
+    }
+  },
+
 'Marketplace': {
     'shortname': 'Mozilla Marketplace',
     'icon': '',
@@ -146,7 +169,7 @@ function debug(str) {
 var OpenSearch = {
   plugins: defaults,
 
-  getSuggestions: function os_getSuggestions(name, search, count, callback) {
+  getSuggestions: function(name, search, count, callback) {
 
     var plugin = this.plugins[name];
     if (!plugin || !plugin.suggestions) {

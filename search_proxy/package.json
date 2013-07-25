@@ -8,7 +8,8 @@
     "email": "kevingrandon@yahoo.com"
   },
   "dependencies": {
-    "express": "*"
+    "express": "*",
+    "yelp": "*"
   },
   "keywords": []
 }

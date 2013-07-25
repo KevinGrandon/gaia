@@ -136,7 +136,7 @@ var Rocketbar = {
 
     for (var name in this.plugins) {
       var plugin = this.plugins[name];
-      var LIMIT = 12;
+      var LIMIT = 6;
       OpenSearchPlugins.getSuggestions(name, query, LIMIT,
         (function(_name, _plugin) {
           return verifyQuery(function(results) {

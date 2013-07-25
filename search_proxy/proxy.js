@@ -78,10 +78,12 @@ app.get('/marketplace', function(req, res){
 
 app.get('/yelp', function(req, res){
     var query = req.query.q;
+    var lat = req.query.lat;
+    var lon = req.query.lon;
 
-    console.log('Got yelp request for: ', query)
+    console.log('Got yelp request for: ', query, lat, lon)
 
-    yelp.request(query, function(response) {
+    yelp.request(query, lat, lon, function(response) {
 
         var suggestions = [];
         var urls = [];
@@ -104,7 +106,7 @@ app.get('/yelp', function(req, res){
         var body = JSON.stringify(openSearchResult);
 
         res.setHeader('Content-Type', 'text/plain');
-        res.setHeader('Content-Length', body.length);
+        //res.setHeader('Content-Length', body.length);
         res.end(body);
     })
 });

@@ -3,6 +3,9 @@ var OpenSearchPlugins = (function OpenSearchPlugins() {
 
 'use strict';
 
+var lastPositionRequest = 0;
+var lastPosition;
+
 var defaults = {
 
 'Yelp': {
@@ -19,11 +22,11 @@ var defaults = {
       'includeSelf': false,
       'method': 'get',
       'type': 'application/x-suggestions+json',
-      //'template': 'http://54.241.22.16/yelp',
-      'template': 'http://localhost/yelp',
+      'template': 'http://54.241.22.16/yelp',
       'parameters': {
         'q': '{searchTerms}',
-        'loc': '{geo:name}'
+        'lat': '{geo:lat}',
+        'lon': '{geo:lon}'
       }
     }
   },
@@ -186,6 +189,7 @@ var OpenSearch = {
       if (params) {
         params += '&';
       }
+
       params += param + '=' + parameters[param].replace(
         '{searchTerms}', search);
     }
@@ -196,101 +200,129 @@ var OpenSearch = {
 
     var type = suggestions.type;
 
-    var xhr = new XMLHttpRequest({mozSystem: true, mozAnon: true});
-    xhr.open('GET', uri, true);
-    xhr.responseType = type;
-    xhr.onload = function() {
-      switch (type) {
-        case 'application/x-suggestions+json':
-          debug('uri: ' + uri);
-          debug('load: ' + xhr.responseText);
-          var json = JSON.parse(xhr.responseText);
 
-          var results = [];
-          var baseURI = plugin.url.template;
-          var keywords = json[1];
+    if (uri.indexOf('{geo:lat}') !== -1 || uri.indexOf('{geo:lon}') !== -1) {
 
-          var urls = json[2] || [];
-          var images = json[3] || [];
-
-          var limit = Math.min(count || keywords.length);
-          for (var i = 0; i < limit; i++) {
-            var uri = baseURI.replace('{searchTerms}', keywords[i]);
-            var thisResult = {
-              title: keywords[i],
-              uri: uri
-            };
-
-            if (urls[i]) {
-              thisResult.uri = urls[i];
-            }
-
-            if (images[i]) {
-              thisResult.icon = images[i];
-            }
-
-            results.push(thisResult);
-          }
-          break;
-
-        case 'application/x-suggestions+xml':
-          var parser = new DOMParser();
-          var responseXML = parser.parseFromString(
-            xhr.responseText,
-            'text/xml'
-          );
-
-          var snapshot = responseXML.evaluate(
-            '//suggestion/@data',
-            responseXML,
-            null,
-            XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-            null
-          );
-
-          var results = [];
-          var baseURI = plugin.url.template;
-
-          for (var i = 0; i < snapshot.snapshotLength; i++) {
-            if (i >= count) {
-              break;
-            }
-
-            var words = snapshot.snapshotItem(i).nodeValue;
-            var uri = baseURI.replace('{searchTerms}', words);
-            results.push({ 'title': words, 'uri': uri});
-          }
-
-          break;
-
-        default:
-          debug('Unsupported type: ' + type);
-          break;
-      }
-
-      // Insert the query into the response if it's not there
-      // We might want to control this with a parameter
-      var found = false;
-      for (var i = 0, result; result = results[i]; i++) {
-        if (result.title &&
-          result.title.toLowerCase() === search.toLowerCase()) {
-          found = true;
-          break;
+      // If we have a location within the last hour or so, use that
+      if (Date.now() > (lastPositionRequest + 60*60*1000)) {
+        lastPositionRequest = Date.now();
+        navigator.geolocation.getCurrentPosition(function(position) {
+          lastPosition = [position.coords.latitude, position.coords.longitude];
+          uri = uri.replace('{geo:lat}', lastPosition[0]);
+          uri = uri.replace('{geo:lon}', lastPosition[1]);
+          doXhr();
+        });
+      } else {
+        // If we don't have a last position yet, we are in the process of searching, so wait
+        if (!lastPosition) {
+          return;
         }
+        uri = uri.replace('{geo:lat}', lastPosition[0]);
+        uri = uri.replace('{geo:lon}', lastPosition[1]);
+        doXhr();
       }
-      if (!found && suggestions.includeSelf) {
-        var uri = baseURI.replace('{searchTerms}', search);
-        results.push({ 'title': search, 'uri': uri});
-      }
+      
+    } else {
+      doXhr();
+    }
 
-      callback(results);
-    };
+    function doXhr(position) {
+      var xhr = new XMLHttpRequest({mozSystem: true, mozAnon: true});
+      xhr.open('GET', uri, true);
+      xhr.responseType = type;
+      xhr.onload = function() {
+        switch (type) {
+          case 'application/x-suggestions+json':
+            debug('uri: ' + uri);
+            debug('load: ' + xhr.responseText);
+            var json = JSON.parse(xhr.responseText);
 
-    xhr.onerror = function() {
-      debug('error: ' + xhr.status);
-    };
+            var results = [];
+            var baseURI = plugin.url.template;
+            var keywords = json[1];
 
-    xhr.send();
+            var urls = json[2] || [];
+            var images = json[3] || [];
+
+            var limit = Math.min(count || keywords.length);
+            for (var i = 0; i < limit; i++) {
+              var uri = baseURI.replace('{searchTerms}', keywords[i]);
+              var thisResult = {
+                title: keywords[i],
+                uri: uri
+              };
+
+              if (urls[i]) {
+                thisResult.uri = urls[i];
+              }
+
+              if (images[i]) {
+                thisResult.icon = images[i];
+              }
+
+              results.push(thisResult);
+            }
+            break;
+
+          case 'application/x-suggestions+xml':
+            var parser = new DOMParser();
+            var responseXML = parser.parseFromString(
+              xhr.responseText,
+              'text/xml'
+            );
+
+            var snapshot = responseXML.evaluate(
+              '//suggestion/@data',
+              responseXML,
+              null,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
+            );
+
+            var results = [];
+            var baseURI = plugin.url.template;
+
+            for (var i = 0; i < snapshot.snapshotLength; i++) {
+              if (i >= count) {
+                break;
+              }
+
+              var words = snapshot.snapshotItem(i).nodeValue;
+              var uri = baseURI.replace('{searchTerms}', words);
+              results.push({ 'title': words, 'uri': uri});
+            }
+
+            break;
+
+          default:
+            debug('Unsupported type: ' + type);
+            break;
+        }
+
+        // Insert the query into the response if it's not there
+        // We might want to control this with a parameter
+        var found = false;
+        for (var i = 0, result; result = results[i]; i++) {
+          if (result.title &&
+            result.title.toLowerCase() === search.toLowerCase()) {
+            found = true;
+            break;
+          }
+        }
+        if (!found && suggestions.includeSelf) {
+          var uri = baseURI.replace('{searchTerms}', search);
+          results.push({ 'title': search, 'uri': uri});
+        }
+
+        callback(results);
+      };
+
+      xhr.onerror = function() {
+        debug('error: ' + xhr.status);
+      };
+
+      xhr.send();
+    }
   }
 };
 

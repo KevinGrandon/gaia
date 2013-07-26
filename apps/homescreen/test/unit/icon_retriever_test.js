@@ -7,7 +7,8 @@ requireApp('homescreen/js/icon_retriever.js');
 
 var mocksHelperForIconRetriever = new MocksHelper([
   'XMLHttpRequest',
-  'Icon'
+  'Icon',
+  'AppIcon'
 ]);
 mocksHelperForIconRetriever.init();
 
@@ -47,11 +48,11 @@ suite('icon_retriever.js >', function() {
 
     navigator.onLine = true;
 
-    iconAppProtocol = new Icon({
+    iconAppProtocol = new AppIcon({
       icon: 'app://game/icon.png'
     });
 
-    iconHTTPProtocol = new Icon({
+    iconHTTPProtocol = new AppIcon({
       icon: 'http://www.icon.com/icon.png'
     });
   });

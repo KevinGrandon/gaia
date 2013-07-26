@@ -5,12 +5,21 @@ function MockTemplateIcon(bookmark) {
   this.app = bookmark ? { iconable: true } : {};
 }
 
-function MockIcon(descriptor, app) {
+function MockIcon(descriptor) {
+  this.descriptor = descriptor;
+}
+
+function MockAppIcon(descriptor, app) {
   this.descriptor = descriptor;
   this.app = app;
 }
 
-MockIcon.prototype = MockTemplateIcon.prototype = {
+MockIcon.prototype = MockAppIcon.prototype = MockTemplateIcon.prototype = {
+
+  updateAppStatus: function() {
+
+  },
+
   remove: function mi_remove() {
   },
 

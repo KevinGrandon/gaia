@@ -21,6 +21,7 @@ var mocksHelperForGrid = new MocksHelper([
   'HomeState',
   'Page',
   'Dock',
+  'AppIcon',
   'Icon',
   'IconRetriever',
   'TemplateIcon',

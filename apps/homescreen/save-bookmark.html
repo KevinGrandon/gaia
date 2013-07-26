@@ -5,7 +5,7 @@
     <meta name="viewport" content="user-scalable=no,initial-scale=1.0">
 
     <link rel="stylesheet" type="text/css" href="style/homescreen.css">
-    <link rel="stylesheet" type="text/css" href="style/bookmark.css">
+    <link rel="stylesheet" type="text/css" href="style/modal_form.css">
 
     <!-- Shared code -->
     <script type="text/javascript" src="shared/js/l10n.js"></script>
@@ -28,14 +28,14 @@
 
   </head>
   <body>
-    <section id="bookmark-entry-sheet" role="region" class="skin-dark">
+    <section id="bookmark-entry-sheet" role="region" class="skin-dark entry-sheet">
       <header>
         <button id="button-bookmark-cancel">
           <span class="icon icon-close" data-l10n-id="cancel">Cancel</span>
         </button>
         <h1 data-l10n-id="add-to-home-screen">Add to Home Screen</h1>
       </header>
-      <form id="bookmark-form">
+      <form id="bookmark-form" class="modal-form">
         <label data-l10n-id="website-name">
           Website Name<input type="text" id="bookmark-title"></input>
         </label>

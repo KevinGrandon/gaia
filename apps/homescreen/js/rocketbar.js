@@ -223,7 +223,9 @@ var Rocketbar = {
   },
 
   show: function(focus) {
-    this._plugins = OpenSearchPlugins.plugins;
+    OpenSearchPlugins.init(function initPlugins() {
+      this._plugins = OpenSearchPlugins.plugins;
+    }.bind(this));
 
     this.DOM.overlay.classList.add('visible');
     if (focus) {

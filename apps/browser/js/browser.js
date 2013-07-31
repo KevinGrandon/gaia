@@ -158,7 +158,8 @@ var Browser = {
       'clear-private-data-button', 'results', 'tab-panels',
       'danger-dialog-message',
       'danger-dialog-cancel',
-      'danger-dialog-ok'
+      'danger-dialog-ok',
+      'bookmark-menu-add-opensearch'
     ];
 
     var loadBrowserFiles = function() {
@@ -207,6 +208,8 @@ var Browser = {
        this.handleCloseTab.bind(this));
      this.tryReloading.addEventListener('click',
        this.handleTryReloading.bind(this));
+     this.bookmarkMenuAddOpensearch.addEventListener('click',
+       this.addOpensearch.bind(this));
      this.bookmarkMenuAdd.addEventListener('click',
        this.addBookmark.bind(this));
      this.bookmarkMenuRemove.addEventListener('click',
@@ -385,11 +388,20 @@ var Browser = {
       var isCurrentTab = this.currentTab.id === tab.id;
       switch (evt.type) {
 
+      case 'mozbrowseropensearch':
+        tab.openSearch = evt.detail;
+        break;
+
       case 'mozbrowserloadstart':
+
         // iframe will call loadstart on creation, ignore
         if (!tab.url || tab.crashed) {
           return;
         }
+
+        // Default open search properties to null
+        tab.openSearch = false;
+
         // If address bar is hidden then show it
         if (this.addressBarState === this.HIDDEN) {
           this.showAddressBar();
@@ -762,6 +774,21 @@ var Browser = {
     this.currentTab.dom.goForward();
   },
 
+  addOpensearch: function browser_addOpensearch(e) {
+    e.preventDefault();
+    if (!this.currentTab.url)
+      return;
+
+    new MozActivity({
+        name: 'save-open-search',
+        data: {
+          type: 'url',
+          url: this.currentTab.openSearch.href,
+          title: this.currentTab.openSearch.title
+        }
+      });
+  },
+
   addBookmark: function browser_addBookmark(e) {
     e.preventDefault();
     if (!this.currentTab.url)
@@ -826,6 +853,14 @@ var Browser = {
 
   // Adaptor to show menu while press bookmark star
   showBookmarkMenu: function browser_showBookmarkMenu() {
+
+    // Enable the open search link if the site has open search
+    if (this.currentTab.openSearch) {
+      this.bookmarkMenuAddOpensearch.style.display = '';
+    } else {
+      this.bookmarkMenuAddOpensearch.style.display = 'none';
+    }
+
     this.showActionMenu(this.currentTab.url);
   },
 
@@ -1538,7 +1573,7 @@ var Browser = {
                          'titlechange', 'iconchange', 'contextmenu',
                          'securitychange', 'openwindow', 'close',
                          'showmodalprompt', 'error', 'asyncscroll',
-                         'usernameandpasswordrequired'];
+                         'opensearch', 'usernameandpasswordrequired'];
     browserEvents.forEach(function attachBrowserEvent(type) {
       iframe.addEventListener('mozbrowser' + type,
                               this.handleBrowserEvent(tab));

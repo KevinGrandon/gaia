@@ -70,10 +70,8 @@ var Rocketbar = {
 
   handleHashChange: function(evt) {
     evt.stopImmediatePropagation();
-    if (document.location.hash === '#root') {
-      window.removeEventListener('hashchange', this._handleHashChange);
-      this.hide();
-    }
+    window.removeEventListener('hashchange', this._handleHashChange);
+    this.hide();
   },
 
   inputFocus: function(evt) {
@@ -246,5 +244,3 @@ var Rocketbar = {
     }.bind(this), keyboardHideDelay);
   }
 };
-
-Rocketbar.init();

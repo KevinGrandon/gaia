@@ -30,10 +30,6 @@ body[data-transitioning] .apps > div {
 }
 
 /* Here users can view the clock while grid is loading -> better experience */
-#landing-page {
-  display: block;
-}
-
 .apps ol {
   width: 100%;
   padding: 0;
@@ -101,6 +97,11 @@ body[data-transitioning] .apps > div {
 .apps ol > li > div > span {
   overflow: hidden; /* We cut the text to avoid messing up the grid */
   word-wrap: break-word;
+}
+
+/* First page to account for rocketbar */
+.apps .page:first-child ol {
+  padding-top: 2.5rem;
 }
 
 .apps ol > li > div > span.mask {

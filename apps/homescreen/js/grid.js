@@ -9,7 +9,6 @@ var GridManager = (function() {
   var PREFERRED_ICON_SIZE = 60 * (window.devicePixelRatio || 1);
 
   var SAVE_STATE_TIMEOUT = 100;
-  var BASE_WIDTH = 320;
   var BASE_HEIGHT = 460; // 480 - 20 (status bar height)
   var DEVICE_HEIGHT = window.innerHeight;
   var OPACITY_STEPS = 40; // opacity steps between [0,1]
@@ -649,7 +648,14 @@ var GridManager = (function() {
 
   function getFirstPageWithEmptySpace() {
     for (var i = numberOfSpecialPages; i < pages.length; i++) {
-      if (pages[i].getNumIcons() < MAX_ICONS_PER_PAGE) {
+      var numRows = MAX_ICONS_PER_PAGE;
+
+      // One less row due to rocketbar
+      if (i === 0) {
+        numRows = 3 * 4;
+      }
+
+      if (pages[i].getNumIcons() < numRows) {
         return i;
       }
     }
@@ -1193,6 +1199,18 @@ var GridManager = (function() {
         return;
       }
       pageHelper.addPage(convertDescriptorsToIcons(pageState));
+
+      if (pageState.index === 1) {
+        var page = document.querySelector('.page');
+        var rocketbar = document.createElement('div');
+        rocketbar.id = 'rocketbar-activation-icon';
+
+        page.insertBefore(rocketbar, page.firstChild);
+        page.dataset.currentPage = true;
+
+        Rocketbar.init();
+      }
+
     }, function onState() {
       initApps();
       callback();

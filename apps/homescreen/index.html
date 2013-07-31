@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="style/grid.css">
     <link rel="stylesheet" type="text/css" href="style/dragdrop.css">
     <link rel="stylesheet" type="text/css" href="style/dock.css">
-    <link rel="stylesheet" type="text/css" href="style/landing.css">
     <link rel="stylesheet" type="text/css" href="style/rocketbar.css">
 
     <!-- Shared code -->
@@ -28,7 +27,6 @@
 
     <!-- Specific code -->
     <script type="text/javascript" defer src="js/message.js"></script>
-    <script type="text/javascript" defer src="js/landing.js"></script>
     <script type="text/javascript" defer src="js/request.js"></script>
     <script type="text/javascript" defer src="js/bookmark.js"></script>
     <script type="text/javascript" defer src="js/state.js"></script>
@@ -80,18 +78,7 @@
       <div class="paginationScroller" role="slider" aria-valuemin="0" aria-valuenow="0" aria-valuemax="0" aria-controls="icongrid"></div>
     </header>
 
-    <div id="icongrid" class="apps" role="main">
-      <div id="landing-page" data-current-page="true">
-        <div id="rocketbar-activation-icon"></div>
-        <div id="landing-time">
-          <p id="landing-clock">
-            <span class="numbers"></span>
-            <span class="meridiem"></span>
-          </p>
-          <p id="landing-date"></p>
-        </div>
-      </div>
-    </div>
+    <div id="icongrid" class="apps" role="main"></div>
 
     <footer id="footer">
       <div class="dockWrapper"></div>

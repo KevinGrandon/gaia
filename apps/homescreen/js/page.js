@@ -18,7 +18,6 @@ function Icon(descriptor, app) {
 
 
 // Support rendering icons for different screens
-var BASE_WIDTH = 320;
 var SCALE_RATIO = window.devicePixelRatio;
 var MIN_ICON_SIZE = 52;
 var MAX_ICON_SIZE = 60;

@@ -197,12 +197,15 @@ var OpenSearch = {
 
     // If there is no plugin, call the callback and let them handle it
     if (!plugin.suggestions) {
-      callback([
-        {
-          'title': search,
-          'uri': plugin.url.template.replace('{searchTerms}', search)
-        }
-      ]);
+      callback({
+        items: [
+          {
+            'title': search,
+            'uri': plugin.url.template.replace('{searchTerms}', search)
+          }
+        ],
+        isVisual: false
+      });
       return;
     }
 
@@ -333,7 +336,9 @@ var OpenSearch = {
    * Persists an open search provider to async storage
    */
   persist: function(provider, callback) {
-    this.plugins[provider.shortname] = provider;
+    if (provider) {
+      this.plugins[provider.shortname] = provider;
+    }
     asyncStorage.setItem(KEY, JSON.stringify(this.plugins), callback);
   }
 };

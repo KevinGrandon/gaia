@@ -43,6 +43,20 @@
   },
   "orientation": "portrait-primary",
   "activities": {
+    "save-open-search": {
+      "filters": {
+        "type": "url",
+        "url": { "required":true, "regexp":"/^https?:/" }
+      },
+      "disposition": "inline",
+      "href": "/open-search.html",
+      "returnValue": false
+    },
+    "edit-open-search": {
+      "disposition": "inline",
+      "href": "/open-search.html",
+      "returnValue": false
+    },
     "save-bookmark": {
       "filters": {
         "type": "url",

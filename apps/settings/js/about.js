@@ -7,10 +7,18 @@ var About = {
   init: function about_init() {
     document.getElementById('check-update-now').onclick = this.checkForUpdates;
     document.getElementById('ftuLauncher').onclick = this.launchFTU;
+    document.getElementById('manage-search')
+      .addEventListener('click', this.manageSearch);
     this.loadHardwareInfo();
     this.loadGaiaCommit();
     this.loadLastUpdated();
     this.networkStatus();
+  },
+
+  manageSearch: function(e) {
+    new MozActivity({
+      name: 'edit-open-search'
+    });
   },
 
   networkStatus: function about_networkStatus() {

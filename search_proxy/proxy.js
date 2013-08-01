@@ -31,7 +31,7 @@ app.get('/everythingme', function(req, res){
                 images.push('');
         }
 
-        var openSearchResult = [query, suggestions, urls, images];
+        var openSearchResult = [query, suggestions, urls, [], images];
         var body = JSON.stringify(openSearchResult);
 
         res.setHeader('Content-Type', 'text/plain');
@@ -65,7 +65,7 @@ app.get('/marketplace', function(req, res){
             images.push(each.icons['64']);
         }
 
-        var openSearchResult = [query, suggestions, urls, images];
+        var openSearchResult = [query, suggestions, urls, [], images];
         var body = JSON.stringify(openSearchResult);
 
         res.setHeader('Content-Type', 'text/plain');

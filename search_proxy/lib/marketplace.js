@@ -47,5 +47,10 @@ exports.request = function(query, callback) {
         callback(str);
       });
     });
+
+    req.setTimeout(1200, function() {
+      req.abort();
+    });
+
     req.end();
 }

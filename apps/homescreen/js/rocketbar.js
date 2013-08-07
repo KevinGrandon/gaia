@@ -69,8 +69,8 @@ var Rocketbar = {
   },
 
   handleHashChange: function(evt) {
-    evt.stopImmediatePropagation();
-    if (document.location.hash === '#root') {
+    if (document.location.hash !== '#rocketbar') {
+      evt.stopImmediatePropagation();
       window.removeEventListener('hashchange', this._handleHashChange);
       this.hide();
     }
@@ -232,7 +232,7 @@ var Rocketbar = {
     }
 
     // We reset the hash so we know when the user presses the home button
-    document.location.hash = '';
+    document.location.hash = 'rocketbar';
     window.addEventListener('hashchange', this._handleHashChange);
   },
 

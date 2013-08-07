@@ -163,7 +163,6 @@ if (customize.swipe) {
 let content = {
   search_page: {
     provider: 'EverythingME',
-    separate_page: false,
     enabled: search_page_enabled
   },
 

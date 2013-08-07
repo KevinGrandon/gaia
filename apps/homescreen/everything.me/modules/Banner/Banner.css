@@ -3,8 +3,7 @@
   opacity: 0;
   -moz-transition: all 600ms ease;
 }
-.evme-has-results #evmeBanner.visible,
-.evme-display-shortcuts #evmeBanner.visible {
+#evmeBanner.visible {
   z-index: 10001;
   opacity: 1;
   -moz-transition: all 600ms ease;

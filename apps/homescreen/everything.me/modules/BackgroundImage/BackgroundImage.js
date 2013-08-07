@@ -168,12 +168,9 @@ Evme.BackgroundImage = new function Evme_BackgroundImage() {
 
             e && e.preventDefault();
             cbHideFullScreen();
-            active = false;
-            return true;
         }
 
         active = false;
-        return false;
     };
 
     this.isFullScreen = function isFullScreen() {

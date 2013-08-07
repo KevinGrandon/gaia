@@ -69,6 +69,8 @@ Evme.Apps = new function Evme_Apps() {
             "onScrollMove": scrollMove
         });
         
+        self.calcAppsPositions();
+
         elLoading = Evme.$create('div',
                     { 'class': 'loading-apps' },
                     '<progress class="small skin-dark"></progress>');

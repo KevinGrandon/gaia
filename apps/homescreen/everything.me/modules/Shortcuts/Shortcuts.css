@@ -13,7 +13,8 @@
     right: 0;
     bottom: 0;
     z-index: 100;
-    display: none;
+    opacity: 0;
+    pointer-events: none;
     overflow: hidden;
     -moz-transition: opacity .2s linear;
     transition: opacity .2s linear;
@@ -52,13 +53,6 @@
         width: 25%;
         height: 8rem;
         text-align: center;
-
-        /* The above outline is a hack to force Gecko to create only one big
-         * big Thebes layer for shorcuts results instead of trying it to be
-         * smart and result into a lot of layers creation/destruction.
-         */
-        outline: 1px solid transparent;
-        outline-offset: 1px;
     }
         #evmeContainer .shortcut .remove {
             position: absolute;
@@ -125,8 +119,9 @@
             transform: scale(.7) !important;
         }
 
-.evme-display-shortcuts #evmeContainer #shortcuts {
-    display: block;
+#evmeContainer.empty-query:not(.keyboard-visible) #shortcuts {
+    opacity: 1;
+    pointer-events: inherit;
 }
 
 #evmeContainer #shortcuts-customize {

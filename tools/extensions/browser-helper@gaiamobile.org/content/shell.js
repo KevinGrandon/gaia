@@ -67,7 +67,8 @@ Services.obs.addObserver(function onSystemMessage(subject, topic, data) {
     onlyShowApp: msg.onlyShowApp,
     showApp: msg.showApp,
     target: msg.target,
-    expectingSystemMessage: true
+    expectingSystemMessage: true,
+    extra: msg.extra
   });
 }, 'system-messages-open-app', false);
 

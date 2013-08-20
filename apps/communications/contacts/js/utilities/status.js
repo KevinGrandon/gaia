@@ -23,6 +23,11 @@ utils.status = (function() {
       });
     });
   };
+
+  function loadStatus(text) {
+    LazyLoader.load([statusMsg], showStatus.bind(text));
+  }
+
   return {
     show: showStatus
   };

@@ -251,7 +251,7 @@ var Contacts = (function() {
           return;
         }
         contactsDetails.render(currentContact, TAG_OPTIONS);
-        if (contacts.Search.isInSearchMode()) {
+        if (contacts.Search && contacts.Search.isInSearchMode()) {
           navigation.go('view-contact-details', 'go-deeper-search');
         } else {
           navigation.go('view-contact-details', 'go-deeper');
@@ -379,24 +379,6 @@ var Contacts = (function() {
     }
   };
 
-  var handleDetailsBack = function handleDetailsBack() {
-    if (ActivityHandler.currentlyHandling) {
-      ActivityHandler.postCancel();
-      navigation.home();
-    } else {
-      var hasParams = window.location.hash.split('?');
-      var params = hasParams.length > 1 ?
-        extractParams(hasParams[1]) : -1;
-
-      navigation.back();
-      // post message to parent page included Contacts app.
-      if (params['back_to_previous_tab'] === '1') {
-        var message = { 'type': 'contactsiframe', 'message': 'back' };
-        window.parent.postMessage(message, COMMS_APP_ORIGIN);
-      }
-    }
-  };
-
   var handleSelectTagDone = function handleSelectTagDone() {
     var prevValue = contactTag.textContent;
     ContactsTag.clickDone(function() {
@@ -445,10 +427,6 @@ var Contacts = (function() {
 
   var showAddContact = function showAddContact() {
     showForm();
-  };
-
-  var showEditContact = function showEditContact() {
-    showForm(true);
   };
 
   var loadFacebook = function loadFacebook(callback) {
@@ -536,11 +514,15 @@ var Contacts = (function() {
   };
 
   var showOverlay = function c_showOverlay(message, progressClass, textId) {
-    return utils.overlay.show(message, progressClass, textId);
+    Contacts.utility('Overlay', function _loaded() {
+      utils.overlay.show(message, progressClass, textId);
+    });
   };
 
   var hideOverlay = function c_hideOverlay() {
-    utils.overlay.hide();
+    Contacts.utility('Overlay', function _loaded() {
+      utils.overlay.hide();
+    });
   };
 
   var showStatus = function c_showStatus(message) {
@@ -560,8 +542,10 @@ var Contacts = (function() {
   };
 
   var enterSearchMode = function enterSearchMode(evt) {
-    contacts.List.initSearch(function onInit() {
-      contacts.Search.enterSearchMode(evt);
+    Contacts.view('Search', function viewLoaded() {
+      contacts.List.initSearch(function onInit() {
+        contacts.Search.enterSearchMode(evt);
+      });
     });
   };
 
@@ -580,7 +564,6 @@ var Contacts = (function() {
     // Definition of elements and handlers
     utils.listeners.add({
       '#cancel_activity': handleCancel, // Activity (any) cancellation
-      '#cancel-edit': handleCancel, // Cancel edition
       '#add-contact-button': showAddContact,
       '#settings-button': showSettings, // Settings related
       '#cancel-search': exitSearchMode, // Search related
@@ -596,8 +579,6 @@ var Contacts = (function() {
           handler: ignoreReturnKey
         }
       ],
-      '#details-back': handleDetailsBack, // Details
-      '#edit-contact-button': showEditContact,
       'button[type="reset"]': stopPropagation,
       '#settings-done': handleSelectTagDone,
       '#settings-cancel': handleBack,
@@ -634,7 +615,6 @@ var Contacts = (function() {
     var lazyLoadFiles = [
       '/contacts/js/utilities/templates.js',
       '/contacts/js/contacts_shortcuts.js',
-      '/contacts/js/confirm_dialog.js',
       '/contacts/js/contacts_tag.js',
       '/contacts/js/import_utils.js',
       '/contacts/js/utilities/normalizer.js',
@@ -645,9 +625,7 @@ var Contacts = (function() {
       '/contacts/js/utilities/vcard_parser.js',
       '/contacts/js/utilities/import_sim_contacts.js',
       '/contacts/js/utilities/status.js',
-      '/contacts/js/utilities/overlay.js',
       '/contacts/js/utilities/dom.js',
-      '/contacts/js/search.js',
       '/shared/style_unstable/progress_activity.css',
       '/shared/style/status.css',
       '/shared/style/switches.css',
@@ -783,6 +761,13 @@ var Contacts = (function() {
 
   window.addEventListener('localized', initContacts); // addEventListener
 
+  function loadConfirmDialog() {
+    var args = Array.slice(arguments);
+    Contacts.utility('Confirm', function viewLoaded() {
+      ConfirmDialog.show.apply(ConfirmDialog, args);
+    });
+  }
+
   /**
    * Specifies dependencies for resources
    * E.g., mapping Facebook as a dependency of views
@@ -792,8 +777,42 @@ var Contacts = (function() {
       Settings: loadFacebook,
       Details: loadFacebook,
       Form: loadFacebook
-    }
+    },
+    utilities: {}
   };
+
+  // Mapping of view names to element IDs
+  // TODO: Having a more standardized way of specifying this would be nice.
+  // Then we could get rid of this mapping entirely
+  // E.g., #details-view, #list-view, #form-view
+  var elementMapping = {
+    details: 'view-contact-details',
+    form: 'view-contact-form',
+    settings: 'settings-wrapper',
+    search: 'search-view',
+    overlay: 'loading-overlay',
+    confirm: 'confirmation-message'
+  };
+
+  function load(type, file, callback) {
+    /**
+     * Performs the actual lazy loading
+     * Called once all dependencies are met
+     */
+    function doLoad() {
+      var name = file.toLowerCase();
+      LazyLoader.load([
+        document.getElementById(elementMapping[name]),
+        'js/' + type + '/' + name + '.js'
+        ], callback);
+    }
+
+    if (dependencies[type][file]) {
+      return dependencies[type][file](doLoad);
+    }
+
+    doLoad();
+  }
 
   /**
    * Loads a view from the views/ folder
@@ -801,23 +820,20 @@ var Contacts = (function() {
    * @param {Function} callback.
    */
   function loadView(view, callback) {
+    load('views', view, callback);
+  }
 
-    /**
-     * Performs the actual lazy loading
-     * Called once all dependencies are met
-     */
-    function doLoad() {
-      LazyLoader.load(['js/views/' + view.toLowerCase() + '.js'], callback);
-    }
-
-    if (dependencies.views[view]) {
-      return dependencies.views[view](doLoad);
-    }
-
-    doLoad();
+  /**
+   * Loads a utility from the utilities/ folder
+   * @param {String} utility name.
+   * @param {Function} callback.
+   */
+  function loadUtility(utility, callback) {
+    load('utilities', utility, callback);
   }
 
   return {
+    'extractParams': extractParams,
     'goBack' : handleBack,
     'cancel': handleCancel,
     'goToSelectTag': goToSelectTag,
@@ -841,8 +857,10 @@ var Contacts = (function() {
     'onLineChanged': onLineChanged,
     'showStatus': showStatus,
     'loadFacebook': loadFacebook,
+    'confirmDialog': loadConfirmDialog,
     'close': close,
     'view': loadView,
+    'utility': loadUtility,
     get asyncScriptsLoaded() {
       return asyncScriptsLoaded;
     }

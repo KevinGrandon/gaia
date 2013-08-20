@@ -239,17 +239,19 @@ contacts.Settings = (function() {
         // Resolve the promise, meanwhile show an overlay to
         // warn the user of the ongoin operation, dismiss it
         // once we have the result
-        utils.overlay.show(_('preparing-contacts'), null, 'spinner');
-        promise.onsuccess = function onSuccess(ids) {
-          var exporter = new ContactsExporter(strategy);
-          exporter.init(ids, function onExporterReady() {
-            // Leave the contact exporter to deal with the overlay
-            exporter.start();
-          });
-        };
-        promise.onerror = function onError() {
-          utils.overlay.hide();
-        };
+        Contacts.utility('Overlay', function _loaded() {
+          utils.overlay.show(_('preparing-contacts'), null, 'spinner');
+          promise.onsuccess = function onSuccess(ids) {
+            var exporter = new ContactsExporter(strategy);
+            exporter.init(ids, function onExporterReady() {
+              // Leave the contact exporter to deal with the overlay
+              exporter.start();
+            });
+          };
+          promise.onerror = function onError() {
+            utils.overlay.hide();
+          };
+        });
       },
       null,
       navigationHandler,
@@ -439,7 +441,7 @@ contacts.Settings = (function() {
             }
           };
 
-          ConfirmDialog.show(null, msg, noObject, yesObject);
+          Contacts.confirmDialog(null, msg, noObject, yesObject);
         }
       });
     }
@@ -522,20 +524,23 @@ contacts.Settings = (function() {
 
     var cancelled = false, contactsRead = false;
     var importer = new SimContactsImporter();
-    utils.overlay.showMenu();
-    utils.overlay.oncancel = function oncancel() {
-      cancelled = true;
-      importer.finish();
-      if (contactsRead) {
-        // A message about canceling will be displayed while the current chunk
-        // is being cooked
-        progress.setClass('activityBar');
-        utils.overlay.hideMenu();
-        progress.setHeaderMsg(_('messageCanceling'));
-      } else {
-        importer.onfinish(); // Early return while reading contacts
-      }
-    };
+    Contacts.utility('Overlay', function _loaded() {
+      utils.overlay.showMenu();
+      utils.overlay.oncancel = function oncancel() {
+        cancelled = true;
+        importer.finish();
+        if (contactsRead) {
+          // A message about canceling will be displayed while the current chunk
+          // is being cooked
+          progress.setClass('activityBar');
+          utils.overlay.hideMenu();
+          progress.setHeaderMsg(_('messageCanceling'));
+        } else {
+          importer.onfinish(); // Early return while reading contacts
+        }
+      };
+    });
+
     var totalContactsToImport;
     var importedContacts = 0;
     // Delay for showing feedback to the user after importing
@@ -591,7 +596,7 @@ contacts.Settings = (function() {
           window.setTimeout(onSimImport, 0);
         }
       };
-      ConfirmDialog.show(null, _('simContacts-error'), cancel, retry);
+      Contacts.confirmDialog(null, _('simContacts-error'), cancel, retry);
       Contacts.hideOverlay();
     };
 
@@ -603,11 +608,13 @@ contacts.Settings = (function() {
     var importer = null;
     var progress = Contacts.showOverlay(
       _('memoryCardContacts-reading'), 'activityBar');
-    utils.overlay.showMenu();
-    utils.overlay.oncancel = function() {
-      cancelled = true;
-      importer ? importer.finish() : Contacts.hideOverlay();
-    };
+    Contacts.utility('Overlay', function _loaded() {
+      utils.overlay.showMenu();
+      utils.overlay.oncancel = function() {
+        cancelled = true;
+        importer ? importer.finish() : Contacts.hideOverlay();
+      };
+    });
     var wakeLock = navigator.requestWakeLock('cpu');
 
     var importedContacts = 0;
@@ -691,7 +698,8 @@ contacts.Settings = (function() {
           sdImportLink.click();
         }
       };
-      ConfirmDialog.show(null, _('memoryCardContacts-error'), cancel, retry);
+      Contacts.confirmDialog(null, _('memoryCardContacts-error'), cancel,
+        retry);
       Contacts.hideOverlay();
     }
   };

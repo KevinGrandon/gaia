@@ -1,0 +1,55 @@
+{
+  "name": "Contacts2",
+  "description": "Contacts2",
+  "type": "certified",
+  "launch_path": "/",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "icons": {
+    "60": "/style/icons/60/Contacts.png",
+    "120": "/style/icons/Contacts.png"
+  },
+  "locales": {
+    "ar": {
+      "name": "اتصالات",
+      "description": "Gaia اتصالات"
+    },
+    "en-US": {
+      "name": "Contacts",
+      "description": "Gaia Contacts"
+    },
+    "fr": {
+      "name": "Contacts",
+      "description": "Contacts Gaia"
+    },
+    "zh-TW": {
+      "name": "聯絡人",
+      "description": "Gaia 聯絡人"
+    }
+  },
+  "permissions": {
+    "telephony":{},
+    "voicemail":{},
+    "contacts":{ "access": "readwrite" },
+    "mobileconnection":{},
+    "attention":{},
+    "settings":{ "access": "readwrite" },
+    "desktop-notification":{},
+    "alarms": {},
+    "systemXHR": {},
+    "wifi-manage":{},
+    "time": {},
+    "audio-channel-telephony":{},
+    "audio-channel-ringer":{},
+    "browser":{},
+    "idle":{},
+    "storage": {},
+    "device-storage:sdcard": { "access": "readonly" }
+  },
+  "orientation": "portrait-primary",
+  "activities": {},
+  "messages": [],
+  "redirects": []
+}

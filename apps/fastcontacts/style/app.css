@@ -1,0 +1,16 @@
+body, html {
+	padding: 0;
+	margin: 0;
+	font-size: 10px;
+	height: 100%;
+	background: #FFF;
+}
+
+#contacts {
+	height: calc(100% - 5rem);
+	overflow: scroll;
+}
+
+#jump {
+	padding: 1.5rem 1.5rem;
+}

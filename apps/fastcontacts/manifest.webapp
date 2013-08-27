@@ -1,0 +1,42 @@
+{
+"name": "FastContacts",
+  "description": "FastContacts Description",
+  "type": "certified",
+  "launch_path": "/index.html",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "messages": [],
+  "permissions": {
+    "telephony":{},
+    "voicemail":{},
+    "contacts":{ "access": "readwrite" },
+    "mobileconnection":{},
+    "attention":{},
+    "settings":{ "access": "readwrite" },
+    "desktop-notification":{},
+    "alarms": {},
+    "systemXHR": {},
+    "wifi-manage":{},
+    "time": {},
+    "audio-channel-telephony":{},
+    "audio-channel-ringer":{},
+    "browser":{},
+    "idle":{},
+    "storage": {},
+    "device-storage:sdcard": { "access": "readonly" }
+  },
+  "locales": {
+    "en-US": {
+      "name": "FastContacts",
+      "description": "FastContacts Description"
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "60": "/style/icons/60/Contacts.png",
+    "120": "/style/icons/Contacts.png"
+  },
+  "orientation": "portrait-primary"
+}

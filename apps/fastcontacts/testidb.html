@@ -1,0 +1,112 @@
+<html>
+<body>
+IDB test page.
+<script type="text/javascript">
+var db;
+var request = indexedDB.open("MyTestDatabase", 9)
+
+request.onerror = function(event) {
+	alert("Why didn't ou allow my web app to use IndexedDB?!");
+};
+
+request.onsuccess = function(event) {
+	db = request.result
+
+	//var transaction = db.transaction(["customers"], "readwrite");
+	var store = getObjectStore('pages')
+
+	req = store.count()
+
+	// Requests are executed in the order in which they were made against the
+	// transaction, and their results are returned in the same order.
+	// Thus the count text below will be displayed before the actual pub list
+	// (not that it is algorithmically important in this case).
+	req.onsuccess = function(evt) {
+		var count = evt.target.result
+		console.log('Page count is:', count)
+
+		getPages()
+	}
+
+	req.onerror = function(evt) {
+		console.error("count error", this.error)
+	}
+}
+
+request.onupgradeneeded = function(event) {
+		var db = event.target.result;
+
+	console.log("Removing object store.")
+	try {
+		db.deleteObjectStore("pages");
+	} catch(e) {
+		console.log('Error removing store.', this, e)
+	}
+
+	console.log("Adding object store.")
+	try {
+		var objectStore = db.createObjectStore("pages", { keyPath: "id" })
+
+		var pending = 120
+		for (var i = 100; i < pending; i++) {
+			console.log('Creating: ' + i)
+			objectStore.add({
+				id: 'page_' + i,
+				name: 'Page ' + i,
+				created: Date.now()
+			});
+		}
+
+	} catch(e) {
+		console.log('Error creating store.', this, e)
+	}
+}
+
+
+/**
+* @param {string} store_name
+* @param {string} mode either "readonly" or "readwrite"
+*/
+function getObjectStore(store_name, mode) {
+	mode = mode || 'readonly';
+	var tx = db.transaction(store_name, mode);
+	return tx.objectStore(store_name);
+}
+
+
+function getPages() {
+  	console.log('Getting pages!')
+
+	var objectStore = getObjectStore("pages");
+
+	objectStore.openCursor(IDBKeyRange.lowerBound('page_110')).onsuccess = function(event) {
+		var cursor = event.target.result;
+
+		if (cursor) {
+			console.log("UPPER Page:  " + cursor.key + " is " + cursor.value.name);
+			cursor.continue();
+		} else {
+			console.log("No more entries!");
+			getLower()
+		}
+	};
+}
+
+function getLower() {
+	var objectStore = getObjectStore("pages");
+
+	objectStore.openCursor(IDBKeyRange.upperBound('page_110', true)).onsuccess = function(event) {
+		var cursor = event.target.result;
+
+		if (cursor) {
+			console.log("LOWER Page:  " + cursor.key + " is " + cursor.value.name);
+			cursor.continue();
+		} else {
+			console.log("No more entries!");
+		}
+	};
+}
+
+</script>
+</body>
+</html>

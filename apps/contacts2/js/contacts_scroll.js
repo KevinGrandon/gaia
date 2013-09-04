@@ -28,16 +28,30 @@ ContactScroll.prototype = {
     return item.familyName[0][0];
   },
 
-  itemFormat: function(item) {
+  itemNode: function(item) {
     var content = item.givenName + ' ' + item.familyName;
     if (content == ' ') {
       content = item.email[0].value;
     }
 
-    return '<a href="#">' +
-        '<p>' + content + '</p>' +
-        '<p>' + item.org + '</p>' +
-      '</a>';
+    var node = document.createElement('li');
+    node.innerHTML = '<a href="#">' +
+      '<p>' + content + '</p>' +
+      '<p>' + item.org + '</p>' +
+    '</a>';
+
+    if (item.photo[0]) {
+
+      var img = document.createElement('img');
+      img.src = URL.createObjectURL(item.photo[0]);
+
+      var aside = document.createElement('aside');
+      aside.className = 'pack-end';
+      aside.appendChild(img);
+      node.insertBefore(aside, node.childNodes[0]);
+    }
+
+    return node;
   }
 };
 

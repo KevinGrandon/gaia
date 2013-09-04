@@ -68,11 +68,11 @@ CursorScroll.prototype = {
   },
 
   /**
-   * Generates HTML for each item in the list.
+   * Generates a node for each item in the list.
    * @param {Object} Item data.
    * @return {String} Html string for each item.
    */
-  itemFormat: function(obj) {
+  itemNode: function(obj) {
     return '';
   },
 
@@ -132,8 +132,7 @@ CursorScroll.prototype = {
   addForwardItem: function(item) {
     this.addForwardHeader(item);
 
-    var newItem = document.createElement('li');
-    newItem.innerHTML = this.itemFormat(item);
+    var newItem = this.itemNode(item);
     this.dom.forwardLastGroup.appendChild(newItem);
   },
 
@@ -142,8 +141,7 @@ CursorScroll.prototype = {
    * The caller is in charge of inserting the last group into the DOM
    */
   addBackwardItem: function(item, isLast) {
-    var newItem = document.createElement('li');
-    newItem.innerHTML = this.itemFormat(item);
+    var newItem = this.itemNode(item);
 
     var parent = this.dom.backwardLastGroup;
     parent.insertBefore(newItem, parent.childNodes[0]);

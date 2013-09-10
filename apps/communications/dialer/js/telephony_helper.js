@@ -125,16 +125,18 @@ var TelephonyHelper = (function() {
         return;
       }
 
-      ConfirmDialog.show(
-        _(dialogTitle),
-        _(dialogBody),
-        {
-          title: _('emergencyDialogBtnOk'), // Just 'ok' would be better.
-          callback: function() {
-            ConfirmDialog.hide();
+      Contacts.utility('Confirm', function viewLoaded() {
+        ConfirmDialog.show(
+          _(dialogTitle),
+          _(dialogBody),
+          {
+            title: _('emergencyDialogBtnOk'), // Just 'ok' would be better.
+            callback: function() {
+              ConfirmDialog.hide();
+            }
           }
-        }
-      );
+        );
+      });
     };
 
     if (window.hasOwnProperty('LazyL10n')) {

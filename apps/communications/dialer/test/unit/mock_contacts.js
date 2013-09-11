@@ -40,6 +40,12 @@ var MockContacts = {
   findListByNumber: function cm_getContactData(number, maxitems, callback) {
     callback(this.mResult);
   },
+  utility: function(view, callback) {
+    callback();
+  },
+  view: function(view, callback) {
+    callback();
+  },
   mId: 'id',
   mPhoto: null,
   mName: null,

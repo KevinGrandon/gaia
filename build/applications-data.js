@@ -285,6 +285,102 @@ function customizeHomescreen(options) {
   return content;
 }
 
+function customizeRocketscreen(options) {
+  config = options;
+
+  // zeroth grid page is the dock
+  let customize = {'homescreens': [
+    [
+      ['apps', 'communications', 'dialer'],
+      ['apps', 'sms'],
+      ['apps', 'communications', 'contacts'],
+      ['apps', 'browser']
+    ], [
+      // Under rocketbar
+    ], [
+      ['apps', 'camera'],
+      ['apps', 'gallery'],
+      ['apps', 'fm'],
+      ['apps', 'settings'],
+      [GAIA_EXTERNAL_APP_SRCDIR, 'marketplace.firefox.com'],
+      ['apps', 'calendar'],
+      ['apps', 'clock'],
+      ['apps', 'costcontrol'],
+      ['apps', 'email'],
+      ['apps', 'music'],
+      ['apps', 'video']
+    ]
+  ]};
+
+  if (config.DOGFOOD == 1) {
+    customize.homescreens[0].push(['dogfood_apps', 'feedback']);
+  }
+
+  customize = JSON.parse(utils.getDistributionFileContent('homescreens',
+    customize, config.GAIA_DISTRIBUTION_DIR));
+
+  // It defines the threshold in milliseconds to move a collection while
+  // dragging
+  let move_collection_threshold = (customize.move_collection_threshold) ?
+                                 customize.move_collection_threshold : 1500;
+  // It defines the threshold in pixels to consider a gesture like a tap event
+  let tap_threshold = (customize.tap_threshold) ? customize.tap_threshold : 10;
+        // It defines the delay to show the blurring effect for clicked icons
+        let tap_effect_delay = (customize.tap_effect_delay) ?
+                                                                                                                                                                                        customize.tap_effect_delay : 140;
+  // It defines the threshold to consider a gesture like a swipe. Number
+  // in the range 0.0 to 1.0, both included, representing the screen width
+  let swipe_threshold = 0.4;
+  // By default we define the virtual friction to .1 px/ms/ms
+  let swipe_friction = 0.1;
+  // Page transition duration defined in ms (300 ms by default)
+  let transition_duration = 300;
+
+  if (customize.swipe) {
+    if (customize.swipe.threshold)
+      swipe_threshold = customize.swipe.threshold;
+    if (customize.swipe.friction)
+      swipe_friction = customize.swipe.friction;
+    if (customize.swipe.transition_duration)
+      transition_duration = customize.swipe.transition_duration;
+  }
+
+  let content = {
+    tap_threshold: tap_threshold,
+
+                tap_effect_delay: tap_effect_delay,
+
+    move_collection_threshold: move_collection_threshold,
+
+    swipe: {
+      threshold: swipe_threshold,
+      friction: swipe_friction,
+      transition_duration: transition_duration
+    },
+
+    // This specifies whether we optimize homescreen panning by trying to
+    // predict where the user's finger will be in the future.
+    prediction: {
+      enabled: true,
+      lookahead: 16  // 60fps = 16ms per frame
+    },
+
+    grid: customize.homescreens.map(
+      function map_homescreens(applist) {
+        var output = [];
+        for (var i = 0; i < applist.length; i++) {
+          if (applist[i] !== null) {
+            output.push(iconDescriptor.apply(null, applist[i]));
+          }
+        }
+        return output;
+      }
+    )
+  };
+
+  return content;
+}
+
 function execute(options) {
   var distDir = options.GAIA_DISTRIBUTION_DIR;
 
@@ -293,6 +389,12 @@ function execute(options) {
   let init = utils.getFile(config.GAIA_DIR, GAIA_CORE_APP_SRCDIR,
                       'homescreen', 'js', 'init.json');
   utils.writeContent(init, JSON.stringify(homescreen));
+
+  // Rocketscreen
+  var rocketscreen = customizeRocketscreen(options);
+  let init = utils.getFile(config.GAIA_DIR, GAIA_CORE_APP_SRCDIR,
+                      'rocketscreen', 'js', 'init.json');
+  utils.writeContent(init, JSON.stringify(rocketscreen));
 
   // SMS
   let init = utils.getFile(config.GAIA_DIR, 'apps', 'sms', 'js', 'blacklist.json');

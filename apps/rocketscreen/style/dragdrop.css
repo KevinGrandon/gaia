@@ -1,0 +1,95 @@
+.draggable {
+  z-index: 10000;
+  pointer-events: none;
+  position: fixed;
+  text-align: center;
+  width: 8rem;
+}
+
+.draggable > div {
+  width: 100%;
+	margin-top: .4rem;
+	margin-bottom: .4rem;
+  -moz-transform: scale(1.25);
+  -moz-transition: -moz-transform .4s;
+}
+
+/* label wrapper */
+.draggable > div > span {
+  margin-top: 0.1rem;
+  /* shift left edge of text to center */
+  left: 50%;
+}
+
+/* text label */
+.draggable > div > span > span {
+  font-size: 1.3rem;
+  text-shadow: 0 0.1rem 0.2rem rgba(0,0,0,1);
+  /* shift left edge of text half distance to left */
+  margin-left: -106%;
+}
+
+.overDock > div > *:not(img) {
+  opacity: 0;
+}
+
+@-moz-keyframes shake {
+  0% { -moz-transform: scale(1); }
+  25% { -moz-transform: scale(1.05); }
+  50% { -moz-transform: scale(1); }
+  75% { -moz-transform: scale(0.95); }
+  100% { -moz-transform: scale(1); }
+}
+
+@-moz-keyframes none {}
+
+/* Image and label have shaking effect */
+body[data-mode = 'edit'] ol > li > div > img {
+  -moz-animation-name: shake;
+  -moz-animation-duration: .8s;
+  -moz-transform-origin: 50% 50%;
+  -moz-animation-iteration-count: infinite;
+  -moz-animation-timing-function: ease-out;
+}
+
+body[data-transitioning] ol > li > div > img,
+body[data-dragging] ol > li > div > img {
+  -moz-animation-name: none;
+}
+
+body[data-dragging] ol > li span.options {
+  pointer-events: none;
+}
+
+body[data-mode = 'edit'] ol > li[data-dragging] {
+  opacity: 0;
+}
+
+body[data-dragging] ol > li {
+  opacity: 0.7;
+}
+
+body[data-mode = 'edit'] ol > li.hidden {
+  opacity: 0;
+}
+
+body[data-mode = 'edit'] ol > li[data-is-collection = 'true'] > div > img {
+  transform: scale(1);
+  transition: transform .3s;
+}
+
+body[data-dragging] ol > li[data-is-collection = 'true'] > div > img {
+  transform: scale(0.8);
+}
+
+body[data-dragging] ol > li[data-is-collection = 'true'].hover > div::before {
+	transform: scale(1.2);
+	opacity: 0.8;
+}
+
+/* This rules changes the axe icon for a plus symbol */
+
+body[data-dragging] ol > li[data-is-collection = 'true'].hover > span.options,
+body[data-dragging] #footer li[data-is-collection = 'true'].hover > span.options {
+  background: url(../resources/images/plus_small_ico.png) no-repeat left top / 2.4rem;
+}

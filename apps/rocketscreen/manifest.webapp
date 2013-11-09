@@ -1,0 +1,47 @@
+{
+  "name": "Homescreen",
+  "description": "Rocketscreen",
+  "launch_path": "/index.html#root",
+  "type": "certified",
+  "role": "homescreen",
+  "developer": {
+    "name": "The Gaia Team",
+    "url": "https://github.com/mozilla-b2g/gaia"
+  },
+  "permissions": {
+    "mobileconnection":{},
+    "webapps-manage":{},
+    "systemXHR":{},
+    "settings":{ "access": "readwrite" },
+    "open-remote-window":{},
+    "storage":{},
+    "geolocation": {},
+    "alarms": {},
+    "power":{}
+  },
+  "locales": {
+    "en-US": {
+      "name": "Rocketscreen",
+      "description": "Gaia Rocketscreen"
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "30": "/style/icons/HomeScreen.png"
+  },
+  "orientation": "default",
+  "activities": {
+    "save-bookmark": {
+      "filters": {
+        "type": "url",
+        "url": { "required":true, "pattern":"https?:.{1,16384}" }
+      },
+      "disposition": "inline",
+      "href": "/save-bookmark.html",
+      "returnValue": true
+    }
+  },
+  "messages": [
+    { "alarm": "/index.html" }
+  ]
+}

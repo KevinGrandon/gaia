@@ -15,10 +15,16 @@ var Rocketbar = {
 
   init: function() {
 
+    var gridPage = document.querySelector('#icongrid > div:first-child');
+    // TODO: Terrible hack, fire event from homescreen instead
+    if (!gridPage) {
+      setTimeout(Rocketbar.init.bind(Rocketbar), 200);
+      return;
+    }
+
     var activationIcon = document.createElement('div');
     activationIcon.id = 'rocketbar-activation-icon';
 
-    var gridPage = document.querySelector('#icongrid > div:first-child');
     gridPage.insertBefore(activationIcon, gridPage.firstChild);
 
     this.getInstalledApps();
@@ -255,4 +261,4 @@ var Rocketbar = {
 };
 
 
-window.addEventListener('collectionlaunch', Rocketbar.init.bind(Rocketbar));
+window.addEventListener('load', Rocketbar.init.bind(Rocketbar));

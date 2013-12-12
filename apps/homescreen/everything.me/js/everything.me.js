@@ -4,6 +4,11 @@ var EverythingME = {
   pendingEvent: undefined,
 
   init: function EverythingME_init() {
+
+    window.addEventListener('message', function(e) {
+      console.log('Everythingme event is: ', e);
+    });
+
     var footer = document.querySelector('#footer');
     if (footer) {
       footer.style.MozTransition = '-moz-transform .3s ease';

@@ -1,3 +1,4 @@
+
 'use strict';
 
 mocha.globals(['AppWindow', 'AppChrome', 'System',
@@ -61,7 +62,8 @@ suite('system/AppChrome', function() {
     var app1 = new AppWindow(fakeAppConfig1);
     var chrome1 = new AppChrome(app1);
     var stubShowProgress = this.sinon.stub(chrome1, 'show');
-    chrome1.handleEvent({ type: '_loading' });
+    chrome1.handleEvent({ type: '_loading',
+      detail: { url: 'http://mozilla.org' } });
     assert.isTrue(stubShowProgress.calledWith(chrome1.progress));
   });
 

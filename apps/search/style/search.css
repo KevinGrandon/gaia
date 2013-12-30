@@ -7,7 +7,6 @@ body {
 section {
   color: #fff;
 }
-<<<<<<< HEAD
 
 section.suggestions {
   border-bottom: 1px solid #5A5A5A;
@@ -29,11 +28,6 @@ section.suggestions ul li {
 }
 
 section.local .result {
-=======
-section#localapps .result,
-section#contacts .result,
-section#history {
->>>>>>> 895a9957a5329655924496531ab5ff54a4d7f99e
   -moz-box-sizing: border-box;
   padding: 0.5rem;
   border-bottom: 1px solid #5A5A5A;

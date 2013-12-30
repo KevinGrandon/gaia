@@ -37,15 +37,13 @@
   }
 
   function History() {
-    this.name = 'History';
   }
 
   History.prototype = {
 
-    init: function(config) {
-      this.container = config.container;
-      this.container.addEventListener('click', this.click);
-    },
+    __proto__: Provider.prototype,
+
+    name: 'History',
 
     click: function(e) {
       var target = e.target;
@@ -71,10 +69,6 @@
         fragment.appendChild(div);
       }
       this.container.appendChild(fragment.cloneNode(true));
-    },
-
-    clear: function() {
-      this.container.innerHTML = '';
     }
   };
 

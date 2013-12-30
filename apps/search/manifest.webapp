@@ -24,6 +24,12 @@
     "systemXHR":{},
     "contacts":{ "access": "readonly" }
   },
+  "datastores-access": {
+     "places": {
+       "access": "readonly",
+       "description": "a database"
+     }
+   },
   "connections": {
     "search": {
       "handler_path": "index.html",

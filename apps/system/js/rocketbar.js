@@ -8,7 +8,7 @@ var Rocketbar = {
 
   _port: null,
 
-  searchContainer: document.getElementById('search-container'),
+  searchResults: document.getElementById('search-results'),
 
   searchBar: document.getElementById('search-bar'),
 
@@ -16,10 +16,14 @@ var Rocketbar = {
 
   searchReset: document.getElementById('search-reset'),
 
-  searchForm: document.getElementById('search-form'),
+  screen: document.getElementById('screen'),
 
   get shown() {
-    return ('visible' in this.searchBar.dataset);
+    return ('visible' in this.searchResults.dataset);
+  },
+
+  set content(val) {
+    this.searchInput.value = val;
   },
 
   get searchInput() {
@@ -36,7 +40,7 @@ var Rocketbar = {
         'input': input.value
       });
     });
-    this.searchForm.addEventListener('submit', function onSubmit(e) {
+    this.searchBar.addEventListener('submit', function onSubmit(e) {
       e.preventDefault();
       self._port.postMessage({
         'type': 'submit',
@@ -49,7 +53,23 @@ var Rocketbar = {
   },
 
   handleEvent: function(e) {
+    if (!this.enabled) {
+      return;
+    }
+
     switch (e.type) {
+      case 'home':
+        this.content = '';
+        break;
+      case 'apploading':
+      case 'apptitlechange':
+      case 'appforeground':
+        if (e.detail instanceof AppWindow && e.detail.config.chrome &&
+            e.detail.isActive()) {
+          this.content = e.detail.title;
+          this.element.classList.remove('hidden');
+        }
+        break;
       case 'keyboardchange':
         // When the keyboard is opened make sure to not resize
         // the current app by swallowing the event.
@@ -68,7 +88,7 @@ var Rocketbar = {
       case 'search-reset':
         e.preventDefault();
         e.stopPropagation();
-        this.searchInput.value = '';
+        this.content = '';
         this.searchReset.classList.add('hidden');
         break;
       default:
@@ -103,10 +123,15 @@ var Rocketbar = {
       this.searchManifestURL = url.match(/(^.*?:\/\/.*?\/)/)[1] +
         'manifest.webapp';
     }.bind(this));
+
+    window.addEventListener('apploading', this);
+    window.addEventListener('appforeground', this);
+    window.addEventListener('apptitlechange', this);
+    window.addEventListener('home', this);
   },
 
   loadSearchApp: function() {
-    var container = this.searchContainer;
+    var container = this.searchResults;
     var searchFrame = container.querySelector('iframe');
 
     // If there is already a search frame, tell it that it is
@@ -170,9 +195,8 @@ var Rocketbar = {
     if (detail.action) {
       this[detail.action]();
     } else if (detail.input) {
-      var input = this.searchInput;
-      input.value = detail.input;
-      this._port.postMessage({ 'input': input.value });
+      this.content = detail.input;
+      this._port.postMessage({ 'input': detail.input });
     }
   },
 
@@ -184,13 +208,13 @@ var Rocketbar = {
 
     this.searchInput.blur();
 
-    var searchFrame = this.searchContainer.querySelector('iframe');
+    this.screen.classList.remove('rocketbar');
+
+    var searchFrame = this.searchResults.querySelector('iframe');
     if (searchFrame) {
       searchFrame.setVisible(false);
     }
-    delete this.searchBar.dataset.visible;
-
-    window.dispatchEvent(new CustomEvent('rocketbarhidden'));
+    delete this.searchResults.dataset.visible;
   },
 
   render: function() {
@@ -200,19 +224,18 @@ var Rocketbar = {
 
     document.body.addEventListener('keyboardchange', this, true);
 
-    var search = this.searchBar;
+    this.screen.classList.add('rocketbar');
+
+    var search = this.searchResults;
     search.dataset.visible = 'true';
 
-    var input = this.searchInput;
-    input.value = '';
+    this.content = '';
     this.searchReset.classList.add('hidden');
-
-    window.dispatchEvent(new CustomEvent('rocketbarshown'));
 
     var self = this;
     search.addEventListener('transitionend', function shown(e) {
       search.removeEventListener(e.type, shown);
-      input.focus();
+      self.searchInput.focus();
       self.loadSearchApp();
     });
   }

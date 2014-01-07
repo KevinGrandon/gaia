@@ -150,7 +150,7 @@
   z-index: 2044;
 }
 
-#screen > [data-z-index-level="search-bar"] {
+#screen > [data-z-index-level="search-results"] {
   z-index: 2043;
 }
 

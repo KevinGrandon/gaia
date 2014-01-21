@@ -20,8 +20,12 @@
   background: #000;
 }
 
+#search-form.hidden {
+  display: none;
+}
+
 #search-input {
-  margin-top: 2rem;
+  /*margin-top: 2rem;*/
   width: calc(100% - 6.5rem);
   border: 0;
   border-radius: 0;

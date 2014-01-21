@@ -229,12 +229,40 @@ var StatusBar = {
     window.addEventListener('appopened', this);
     window.addEventListener('homescreenopened', this.show.bind(this));
 
+    window.addEventListener('rocketbarshown', this);
+    window.addEventListener('rocketbarhidden', this);
+
     this.systemDownloadsCount = 0;
     this.setActive(true);
   },
 
   handleEvent: function sb_handleEvent(evt) {
     switch (evt.type) {
+      case 'rocketbarshown':
+        this.element.classList.add('expanded');
+        this.element.classList.remove('hidden');
+        this.searchForm.classList.add('hidden');
+
+        this.element.addEventListener('transitionend', function ontransition() {
+          this.element.removeEventListener('transitionend', ontransition);
+          this.element.classList.add('hidden');
+          this.searchForm.classList.remove('hidden');
+        }.bind(this));
+        break;
+      case 'rocketbarhidden':
+        this.element.classList.remove('hidden');
+        this.searchForm.classList.add('hidden');
+
+        this.element.addEventListener('transitionend', function ontransition() {
+          this.element.removeEventListener('transitionend', ontransition);
+          this.element.classList.remove('hidden');
+          this.searchForm.classList.add('hidden');
+        }.bind(this));
+
+        setTimeout(function nextTick() {
+          this.element.classList.remove('expanded');
+        }.bind(this));
+        break;
       case 'appopened':
         var app = evt.detail;
         if (app.isFullScreen()) {
@@ -907,6 +935,7 @@ var StatusBar = {
     }
 
     this.element = document.getElementById('statusbar');
+    this.searchForm = document.getElementById('search-form');
     this.screen = document.getElementById('screen');
     this.attentionBar = document.getElementById('attention-bar');
   }

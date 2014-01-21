@@ -24,6 +24,15 @@ body, html {
   display: flex;
   flex-direction: row;
   -moz-user-select: none;
+  transition: height 0.15s ease;
+}
+
+#statusbar.expanded {
+  height: 4rem;
+}
+
+#statusbar.hidden {
+  display: none;
 }
 
 #screen.locked:not(.attention) #statusbar{

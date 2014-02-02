@@ -515,13 +515,14 @@
       }
     };
 
-  AppWindow.prototype._handle__localized = function aw__handle__localized() {
+  AppWindow.prototype._handle__localized = function aw__handle__localized(evt) {
     if (!this.manifest) {
       return;
     }
     this.name = new self.ManifestHelper(this.manifest).name;
     // For uitest.
     this.element.dataset.localizedName = this.name;
+    this.publish('namechange');
   };
 
   AppWindow.prototype._handle_mozbrowservisibilitychange =

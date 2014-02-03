@@ -134,10 +134,8 @@ var Rocketbar = {
         break;
       case 'search-input':
         if (e.type === 'blur') {
-          this.screen.classList.remove('rocketbar-focus');
           return;
         }
-        this.screen.classList.add('rocketbar-focus');
 
         // If the current text is not a URL, clear it.
         if (UrlHelper.isNotURL(this.searchInput.value)) {
@@ -347,12 +345,7 @@ var Rocketbar = {
     window.dispatchEvent(new CustomEvent('rocketbarshown'));
 
     this.loadSearchApp();
-
-    if (this.home === 'search') {
-      // Only focus for search views
-      input.focus();
-    }
-
+    input.focus();
   }
 };
 

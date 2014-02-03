@@ -156,7 +156,7 @@
 }
 
 #screen.task-manager #cards-view li.card {
-  transform-origin: 50% 30%;
+  transform-origin: 50% 10%;
 }
 
 #screen.task-manager #cards-view .card > p {

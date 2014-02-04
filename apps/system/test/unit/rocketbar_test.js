@@ -1,4 +1,5 @@
 'use strict';
+/* global AppWindowManager, MocksHelper, Rocketbar */
 
 requireApp('system/shared/js/url_helper.js');
 requireApp('system/shared/test/unit/mocks/mock_settings_listener.js');
@@ -8,7 +9,7 @@ requireApp('system/test/unit/mock_lock_screen.js');
 requireApp('system/js/lockscreen.js');
 mocha.globals(['Rocketbar']);
 
-var LockScreen = { locked: false };
+mocha.globals(['dispatchEvent']);
 
 var mocksForRocketBar = new MocksHelper([
   'AppWindowManager',
@@ -19,7 +20,6 @@ var mocksForRocketBar = new MocksHelper([
 
 suite('system/Rocketbar', function() {
   var stubById;
-  var fakeEvt;
   var fakeElement;
 
   mocksForRocketBar.attachTestHelpers();
@@ -60,6 +60,34 @@ suite('system/Rocketbar', function() {
         }
       });
       assert.ok(Rocketbar.screen.classList.contains('rocketbar-focus'));
+    });
+
+    test('focus, when currentURL is set', function() {
+      Rocketbar.searchInput.select = function() {};
+      var selectStub = this.sinon.stub(Rocketbar.searchInput, 'select');
+      Rocketbar.currentURL = 'http://mozilla.org';
+      Rocketbar.searchInput.value = '';
+      Rocketbar.handleEvent({
+        target: {
+          id: 'search-input'
+        }
+      });
+      assert.equal(Rocketbar.searchInput.value, 'http://mozilla.org');
+      assert.ok(selectStub.calledOnce);
+    });
+
+    test('focus, when currentURL is not set', function() {
+      Rocketbar.searchInput.select = function() {};
+      var selectStub = this.sinon.stub(Rocketbar.searchInput, 'select');
+      Rocketbar.currentURL = null;
+      Rocketbar.searchInput.value = '';
+      Rocketbar.handleEvent({
+        target: {
+          id: 'search-input'
+        }
+      });
+      assert.equal(Rocketbar.searchInput.value, '');
+      assert.ok(selectStub.notCalled);
     });
 
     test('removes rocketbar-focus on blur', function() {
@@ -125,9 +153,10 @@ suite('system/Rocketbar', function() {
 
     test('search-cancel element should show the task manager', function() {
       var dispatchStub = this.sinon.stub(window, 'dispatchEvent');
-      var awmStub = this.sinon.stub(AppWindowManager, 'getRunningApps')
+      this.sinon.stub(AppWindowManager, 'getRunningApps')
         .returns({app1: true, app2: true});
       Rocketbar.home = 'tasks';
+      Rocketbar.searchInput.value = 'http://mozilla.org';
       Rocketbar.handleEvent({
         target: {
           id: 'search-cancel'
@@ -137,6 +166,7 @@ suite('system/Rocketbar', function() {
       });
 
       assert.equal(dispatchStub.getCall(0).args[0].type, 'taskmanagershow');
+      assert.equal(Rocketbar.searchInput.value, '');
     });
 
     test('focus on event call updateResetButton', function() {
@@ -231,6 +261,21 @@ suite('system/Rocketbar', function() {
       assert.equal(true, searchAppStub.calledWith());
       Rocketbar.hide();
       searchAppStub.restore();
+    });
+
+    test('sets currentURL', function() {
+      assert.equal(Rocketbar.currentURL, null);
+      this.sinon.stub(AppWindowManager, 'getActiveApp')
+        .returns({
+          config: {
+            chrome: true,
+            url: 'http://mozilla.org'
+          }
+        });
+      Rocketbar.render(true);
+
+      assert.equal(Rocketbar.currentURL, 'http://mozilla.org');
+      Rocketbar.hide();
     });
 
     suite('interactions', function() {

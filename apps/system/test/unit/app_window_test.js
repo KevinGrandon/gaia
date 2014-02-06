@@ -868,6 +868,17 @@ suite('system/AppWindow', function() {
       app1.config.url = url;
     });
 
+    test('Titlechange event', function() {
+      var app1 = new AppWindow(fakeAppConfig1);
+
+      app1.handleEvent({
+        type: 'mozbrowsertitlechange',
+        detail: 'mozilla'
+      });
+
+      assert.equal(app1.name, 'mozilla');
+    });
+
     test('VisibilityChange event', function() {
       var app1 = new AppWindow(fakeAppConfig1);
       var url = app1.config.url;

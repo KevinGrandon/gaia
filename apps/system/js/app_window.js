@@ -569,7 +569,7 @@
 
   AppWindow.prototype._handle_mozbrowsertitlechange =
     function aw__handle_handle_mozbrowsertitlechange(evt) {
-      this.title = evt.detail;
+      this.updateName(evt.detail);
       this.publish('titlechange');
     };
 

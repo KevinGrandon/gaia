@@ -3,6 +3,7 @@ test_external_apps/*
 external-apps/*
 outoftree_apps/*
 test_apps/ds-test
+test_apps/voiceinput
 test_apps/demo-keyboard
 test_apps/geoloc
 test_apps/membuster

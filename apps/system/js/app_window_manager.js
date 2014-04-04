@@ -97,6 +97,8 @@
       // XXX: Do this in HomescreenWindow.
       if (appCurrent === null) {
         homescreenLauncher.getHomescreen().setVisible(false);
+      } else if (newApp === rocketbarLauncher.origin) {
+        rocketbarLauncher.show();
       } else if (appCurrent.instanceID == appNext.instanceID) {
         // Do nothing.
         console.warn('the app has been displayed.');
@@ -212,6 +214,7 @@
       }
       window.addEventListener('launchapp', this);
       window.addEventListener('home', this);
+      window.addEventListener('showrocketbar', this);
       window.addEventListener('appcreated', this);
       window.addEventListener('appterminated', this);
       window.addEventListener('ftuskip', this);
@@ -460,6 +463,11 @@
               activeApp.blur();
             }
           }
+          break;
+
+        case 'showrocketbar':
+          this.debug('show rocketbar.');
+          this.display(rocketbarLauncher.origin);
           break;
 
         // If the lockscreen is active, it will stop propagation on this event

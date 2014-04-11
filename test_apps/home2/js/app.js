@@ -23,6 +23,8 @@
 
   App.prototype = {
 
+    HIDDEN_ROLES: HIDDEN_ROLES,
+
     /**
      * List of all application icons.
      * Maps an icon identifier to an icon object.
@@ -36,14 +38,29 @@
     items: [],
 
     /**
+     * Adds an item into the items array.
+     * If the item is an icon, add it to icons.
+     */
+    addItem: function(item) {
+      this.items.push(item);
+
+      if (item instanceof Icon) {
+        this.icons[item.identifier] = item;
+      }
+    },
+
+    /**
      * Fetch all icons and render them.
      */
     init: function() {
-      navigator.mozApps.mgmt.getAll().onsuccess = function(event) {
-        event.target.result.forEach(this.makeIcons.bind(this));
+      this.itemStore = new ItemStore();
+      this.itemStore.all(function _all(results) {
+        results.forEach(function _eachResult(result) {
+          this.addItem(result);
+        }, this);
         this.render();
         this.start();
-      }.bind(this);
+      }.bind(this));
     },
 
     start: function() {
@@ -52,42 +69,6 @@
 
     stop: function() {
       this.container.removeEventListener('click', this.iconLaunch);
-    },
-
-    /**
-     * Creates icons for an app based on hidden roles and entry points.
-     */
-    makeIcons: function(app) {
-      if (HIDDEN_ROLES.indexOf(app.manifest.role) !== -1) {
-        return;
-      }
-
-      function eachIcon(icon) {
-        /* jshint validthis:true */
-
-        // If there is no icon entry, do not push it onto items.
-        if (!icon.icon) {
-          return;
-        }
-
-        // FIXME: Remove after we have real divider insertion/remembering.
-        tempCurrent++;
-        if (tempCurrent >= tempDivideEvery) {
-          this.items.push(new Divider());
-          tempCurrent = 0;
-        }
-
-        this.items.push(icon);
-        this.icons[icon.identifier] = icon;
-      }
-
-      if (app.manifest.entry_points) {
-        for (var i in app.manifest.entry_points) {
-          eachIcon.call(this, new Icon(app, i));
-        }
-      } else {
-        eachIcon.call(this, new Icon(app));
-      }
     },
 
     /**

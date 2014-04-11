@@ -16,11 +16,12 @@
   transform-origin: left top;
 }
 
-#statusbar-background.expanded {
+body.rb-setting-enabled #statusbar-background.expanded,
+#screen.rb-home-proxy #statusbar-background.expanded {
   transform: scaleY(1);
 }
 
-body.rb-enabled #screen:not(.cards-view) #statusbar-background.on-homescreen:not(.rocketbar-focused) {
+body.rb-enabled #screen:not(.cards-view):not(.rb-home-proxy) #statusbar-background.on-homescreen:not(.rocketbar-focused) {
   transform: scaleY(1.5);
 }
 

@@ -21,6 +21,7 @@ var Rocketbar = {
     this.onHomescreen = false;
 
     // Properties
+    this._settingEnabled = false;
     this._port = null; // Inter-app communications port
     this._touchStart = -1;
     this._wasClicked = false; // Remember when transition triggered by a click
@@ -40,11 +41,18 @@ var Rocketbar = {
     SettingsListener.observe('rocketbar.enabled', false,
       function(value) {
       if (value) {
+        this._settingEnabled = value;
+        this.body.classList.add('rb-setting-enabled');
         this.enable();
       } else {
         this.disable();
+        this.body.classList.remove('rb-setting-enabled');
+        this._settingEnabled = value;
       }
     }.bind(this));
+
+    // Listen for messages from search app
+    window.addEventListener('iac-search-results', this);
   },
 
   /**
@@ -88,9 +96,6 @@ var Rocketbar = {
     this.input.addEventListener('blur', this);
     this.input.addEventListener('input', this);
     this.form.addEventListener('submit', this);
-
-    // Listen for messages from search app
-    window.addEventListener('iac-search-results', this);
 
     // Listen for FTU events
     window.addEventListener('ftudone', this);
@@ -175,9 +180,6 @@ var Rocketbar = {
     this.input.removeEventListener('blur', this);
     this.input.removeEventListener('input', this);
     this.form.removeEventListener('submit', this);
-
-    // Stop listening for messages from search app
-    window.removeEventListener('iac-search-results', this);
   },
 
   /**
@@ -220,6 +222,11 @@ var Rocketbar = {
    * Put Rocketbar into homescreen state.
    */
   enterHome: function() {
+    // Collapse if we're entering the homescreen and the setting is not enabled.
+    if (!this._settingEnabled && this.expanded) {
+      this.collapse();
+    }
+
     if (this.onHomescreen) {
       return;
     }
@@ -234,7 +241,7 @@ var Rocketbar = {
    * Take Rocketbar out of homescreen state.
    */
   exitHome: function() {
-    if (!this.onHomescreen) {
+    if (this._settingEnabled && !this.onHomescreen) {
       return;
     }
     this.onHomescreen = false;
@@ -541,6 +548,25 @@ var Rocketbar = {
     var detail = e.detail;
     if (detail.input) {
       Rocketbar.input.value = detail.input;
+    } else if (!this._settingEnabled && detail.action &&
+      detail.action == 'render') {
+      // Enables the rocketbar for homescreen searches
+      this.screen.classList.add('rb-home-proxy');
+      this.enable();
+      this.expand();
+      this.focus();
+      this.loadSearchApp();
+
+      // When rocketbar hides, or the home button is pressed
+      // Disable rocketbar because it shouldn't be enabled everywhere.
+      var onRocketBarExit = function() {
+        window.removeEventListener('rocketbarcollapse', onRocketBarExit);
+        this.disable();
+        this.screen.classList.remove('rb-home-proxy');
+      }.bind(this);
+
+      window.addEventListener('rocketbarcollapse', onRocketBarExit);
+
     } else if (detail.action && detail.action == 'hide') {
       this.hideResults();
       this.collapse();

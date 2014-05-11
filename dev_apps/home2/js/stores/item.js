@@ -1,6 +1,7 @@
 'use strict';
 /* global ApplicationSource */
 /* global Bookmark */
+/* global BookmarkSource */
 /* global Collection */
 /* global CollectionSource */
 /* global dispatchEvent */
@@ -35,10 +36,10 @@
 
   function ItemStore() {
     this.applicationSource = new ApplicationSource(this);
-    /*this.bookmarkSource = new BookmarkSource(this);*/
+    this.bookmarkSource = new BookmarkSource(this);
     this.collectionSource = new CollectionSource(this);
 
-    this.sources = [this.applicationSource, /*this.bookmarkSource,*/
+    this.sources = [this.applicationSource, this.bookmarkSource,
       this.collectionSource];
 
     this.ready = false;

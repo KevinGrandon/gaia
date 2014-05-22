@@ -123,6 +123,9 @@
       var toRemove = [];
 
       this.items.forEach(function(item, idx) {
+        if (idx === 0) {
+          return;
+        }
         if (item instanceof Divider) {
           if (appCount === 0) {
             toRemove.push(idx);

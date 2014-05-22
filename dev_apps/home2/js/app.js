@@ -24,6 +24,12 @@
     init: function() {
       this.itemStore = new ItemStore();
       this.itemStore.all(function _all(results) {
+
+        // Super prototype hacks
+        console.log('ADDING DIIVDER!!!')
+        var newDivider = new Divider();
+        this.grid.add(newDivider);
+
         results.forEach(function _eachResult(result) {
           this.grid.add(result);
         }, this);

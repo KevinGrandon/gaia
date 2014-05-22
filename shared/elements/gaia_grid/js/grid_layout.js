@@ -2,10 +2,10 @@
 
 (function(exports) {
 
-  const maxIconsPerRow = 4;
+  const maxIconsPerRow = 10;
 
-  // 320 / 5 = 64px | 480 / 5 = 96px | 540 / 5 = 108px | ...
-  const iconScaleFactorMaxIconsPerRow = 5;
+  // 320 / 10 = 32px | 480 / 10 = 48px
+  const iconScaleFactorMaxIconsPerRow = 10;
 
   const minIconsPerRow = 3;
 
@@ -14,7 +14,7 @@
 
   const distanceBetweenIconsWithMinIconsPerRow = 32;
 
-  const distanceBetweenIconsWithMaxIconsPerRow = 44;
+  const distanceBetweenIconsWithMaxIconsPerRow = 0;
 
   const windowWidth = window.innerWidth;
 
@@ -33,25 +33,11 @@
 
     _offsetY: 0,
 
-    _percent: 1,
-
     /**
      * The visible height of each divider.
      * Calculated by the divider class and cached here.
      */
     _dividerLineHeight: 0,
-
-    get percent() {
-      return this._percent;
-    },
-
-    set percent(value) {
-      // Reset the y-offset because we will re-render everything anyway.
-      this._offsetY = 0;
-
-      this._percent = value;
-      this.perRow = maxIconsPerRow + minIconsPerRow - maxIconsPerRow * value;
-    },
 
     /**
      * The height of each grid item.
@@ -94,8 +80,15 @@
       } else if (numCols === maxIconsPerRow) {
         size = windowWidth / iconScaleFactorMaxIconsPerRow;
       }
-
       return size;
+    },
+
+    get percent() {
+      if (this.perRow === minIconsPerRow) {
+        return 1;
+      } else {
+        return 0.33;
+      }
     },
 
     /**

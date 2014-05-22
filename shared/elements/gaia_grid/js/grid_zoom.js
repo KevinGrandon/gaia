@@ -109,13 +109,15 @@
               touchDistance < this.zoomStartDistance &&
               Math.abs(touchDistance - this.zoomStartDistance) >
                 pinchThreshold) {
-              layout.percent = 0.75;
+              layout.perRow = 10;
+              //layout._offsetY = 0;
               this.zoomInProgress = true;
           } else if (layout.perRow > layout.minIconsPerRow &&
                      touchDistance > this.zoomStartDistance &&
                      Math.abs(touchDistance - this.zoomStartDistance) >
                        pinchThreshold) {
-            layout.percent = 1;
+            layout.perRow = 3;
+            //layout._offsetY = 0;
             this.zoomInProgress = true;
           } else {
             return;

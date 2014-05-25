@@ -14,10 +14,29 @@ gaia-grid {
   width: 100%;
 }
 
-body[data-cols="4"] .icon .title {
-  /* Font size is the same independent on grid configuration */
-  font-size: calc(1.4rem * 1.333);
+body[data-cols="10"] .icon .title {
+  display: none !important;
 }
+
+/* START SUPER HACKS */
+.divider header {
+  color: #fff;
+  font-size: 2.2rem;
+  position: absolute;
+  left: 0;
+  top: 10px;
+  text-shadow: 0.1rem 0.1rem 0.3rem rgba(0, 0, 0, 0.3),
+               0.2rem 0.4rem 1rem rgba(0, 0, 0, 0.4);
+}
+
+body[data-cols="10"] .icon {
+  width: calc(100% / 3.5) !important;
+}
+
+body[data-cols="10"] .divider {
+  margin: 1.3rem 17% !important;
+}
+/* END SUPER HACKS */
 
 .edit-mode #edit-mode-curtain {
   background: #000;

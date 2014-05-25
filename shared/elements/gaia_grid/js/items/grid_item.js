@@ -105,6 +105,7 @@
      */
     renderIconFromBlob: function(blob) {
       this.element.style.height = this.grid.layout.gridItemHeight + 'px';
+      console.log('Grid item, setting icon size: ', this.grid.layout.gridIconSize + CANVAS_PADDING, this.grid.layout.gridItemHeight)
       this.element.style.backgroundSize =
         (this.grid.layout.gridIconSize + CANVAS_PADDING) + 'px';
       this.element.style.backgroundImage =
@@ -123,7 +124,7 @@
         tile.className = 'icon';
         tile.dataset.identifier = this.identifier;
         tile.setAttribute('role', 'link');
-
+console.log('GRID ITEM SIZE:', this.grid.layout.gridIconSize)
         // This <p> has been added in order to place the title with respect
         // to this container via CSS without touching JS.
         var nameContainerEl = document.createElement('p');

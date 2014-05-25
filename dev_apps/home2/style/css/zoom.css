@@ -57,10 +57,10 @@
   background-image: url(/style/images/3_col_grid_active.png);
 }
 
-#zoom .indicator[data-cols="4"] {
+#zoom .indicator[data-cols="10"] {
   background-image: url(/style/images/4_col_grid.png);
 }
 
-#zoom .indicator.active[data-cols="4"] {
+#zoom .indicator.active[data-cols="10"] {
   background-image: url(/style/images/4_col_grid_active.png);
 }

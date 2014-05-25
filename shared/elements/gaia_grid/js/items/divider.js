@@ -38,12 +38,18 @@
     /**
      * Height in pixels of each divider.
      */
-    pixelHeight: 70,
+    get pixelHeight() {
+      if (this.grid.layout.perRow === 10) {
+        return 65;
+      } else {
+        return 100;
+      }
+    },
 
     /**
      * Width in grid units for each divider.
      */
-    gridWidth: 4,
+    gridWidth: 100,
 
     scale: 1,
 
@@ -61,6 +67,14 @@
         var span = document.createElement('span');
         span.style.height = this.lineHeight + 'px';
         divider.appendChild(span);
+
+        // Place a random header
+        var items = ['GAMES', 'PRODUCTIVITY', 'MUSIC','MEDIA',
+          'TOOLS', 'TRAVEL', 'FAVES', 'RESTAURANTS', 'REVIEWS',
+          'MOVIES', 'EATING'];
+        var header = document.createElement('header');
+        header.textContent = items[Math.floor(Math.random()*items.length)];
+        divider.appendChild(header);
 
         this.grid.element.appendChild(divider);
       }

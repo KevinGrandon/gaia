@@ -1,0 +1,39 @@
+label.pack-radio {
+  display: inline-block;
+  vertical-align: middle;
+  width: 5rem;
+  height: 5rem;
+  position: relative;
+  background: none;
+}
+
+label.pack-radio input {
+  margin: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+label.pack-radio input ~ span:after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -1.1rem 0 0 -1.1rem;
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+label.pack-radio input ~ span:after {
+  background: url(images/default.png) no-repeat center top / 2.2rem auto;
+}
+
+label.pack-radio input:checked ~ span:after {
+  background-position: center bottom;
+}
+
+/* 'Dangerous' radio */
+label.pack-radio.danger input ~ span:after {
+  background-image: url(images/danger.png);
+}

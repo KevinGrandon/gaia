@@ -2,7 +2,8 @@
 
 (function(exports) {
 
-  const activeScaleAdjust = 0.4;
+  /* The scale to use on icons that are being dragged */
+  const activeScale = 1.4;
 
   /* This delay is the time passed once users stop the finger over an icon and
    * the rearrange is performed */
@@ -22,7 +23,6 @@
   function DragDrop(gridView) {
     this.gridView = gridView;
     this.container = gridView.element;
-    this.scrollable = this.container.parentNode;
     this.container.addEventListener('contextmenu', this);
   }
 
@@ -45,13 +45,6 @@
      * @type {boolean}
      */
     inEditMode: false,
-
-    /**
-     * Returns the maximum active scale value.
-     */
-    get maxActiveScale() {
-      return 1 + activeScaleAdjust;
-    },
 
     /**
      * Returns true if we are currently dragging an icon.
@@ -83,27 +76,33 @@
       var items = this.gridView.items;
       var lastElement = items[items.length - 1];
       this.maxScroll = lastElement.y + lastElement.pixelHeight +
-                       (this.icon.pixelHeight * this.maxActiveScale);
+                       (this.icon.pixelHeight * this.activeScale);
 
       // Make the icon larger
       this.icon.transform(
         e.pageX - this.xAdjust,
-        e.pageY - this.yAdjust + this.scrollable.scrollTop,
-        this.icon.scale + activeScaleAdjust);
+        e.pageY - this.yAdjust + this.container.scrollTop,
+        activeScale, true);
+
+      // Re-render the grid using transforms to aid with animation
+      this.gridView.render(0, this.gridView.items.length - 1, true);
     },
 
     finish: function(e) {
       this.currentTouch = null;
 
       delete this.icon.noTransform;
-      this.icon = null;
       this.target.classList.remove('active');
 
       if (this.rearrangeDelay !== null) {
         clearTimeout(this.rearrangeDelay);
         this.doRearrange.call(this);
       } else {
-        this.gridView.render();
+        for (var i = 0, iLen = this.gridView.items.length; i < iLen; i++) {
+          if (this.gridView.items[i] == this.icon) {
+            this.gridView.render(i, i, true);
+          }
+        }
       }
 
       // Save icon state if we need to
@@ -119,7 +118,10 @@
         window.dispatchEvent(new CustomEvent('gaiagrid-dragdrop-finish'));
       }.bind(this));
 
-      this.container.classList.remove('dragging');
+      // Remove the dragging property after the icon has transitioned into
+      // place to avoid jank due to animations starting that are disabled
+      // when dragging.
+      this.icon.element.addEventListener('transitionend', this);
     },
 
     /**
@@ -154,13 +156,13 @@
       function doScroll(amount) {
         /* jshint validthis:true */
         this.isScrolling = true;
-        this.scrollable.scrollTop += amount;
+        this.container.scrollTop += amount;
         exports.requestAnimationFrame(this.scrollIfNeeded.bind(this));
         touch.pageY += amount;
         this.positionIcon(touch.pageX, touch.pageY);
       }
 
-      var docScroll = this.scrollable.scrollTop;
+      var docScroll = this.container.scrollTop;
       var distanceFromTop = Math.abs(touch.pageY - docScroll);
       if (distanceFromTop > screenHeight - edgePageThreshold) {
         var maxY = this.maxScroll;
@@ -191,7 +193,8 @@
       this.icon.transform(
         pageX,
         pageY,
-        this.icon.scale + activeScaleAdjust);
+        activeScale,
+        true);
 
       // Reposition in the icons array if necessary.
       // Find the icon with the closest X/Y position of the move,
@@ -225,8 +228,8 @@
       this.dirty = true;
       this.gridView.items.splice(tIndex, 0,
         this.gridView.items.splice(sIndex, 1)[0]);
-      tIndex < sIndex ? this.gridView.render(tIndex, sIndex) :
-        this.gridView.render(sIndex, tIndex);
+      tIndex < sIndex ? this.gridView.render(tIndex, sIndex, true) :
+        this.gridView.render(sIndex, tIndex, true);
     },
 
     enterEditMode: function() {
@@ -266,6 +269,10 @@
             break;
 
           case 'contextmenu':
+            if (this.icon) {
+              return;
+            }
+
             this.target = e.target;
 
             if (!this.target) {
@@ -291,7 +298,7 @@
           case 'touchmove':
             var touch = e.touches[0];
 
-            var pageY = touch.pageY + this.scrollable.scrollTop;
+            var pageY = touch.pageY + this.container.scrollTop;
             this.positionIcon(touch.pageX, pageY);
 
             this.currentTouch = {
@@ -304,13 +311,30 @@
             }
 
             break;
-            
+
           case 'touchend':
             // Ensure the app is not launched
             e.stopImmediatePropagation();
             e.preventDefault();
             this.removeDragHandlers();
             this.finish(e);
+            break;
+
+          case 'transitionend':
+            if (!this.icon) {
+              return;
+            }
+
+            this.container.classList.remove('dragging');
+            this.icon.element.removeEventListener('transitionend', this);
+            this.icon = null;
+
+            // Re-render the grid view without using transforms
+            this.gridView.render(0, this.gridView.items.length - 1);
+
+            // Recalculate visibility as we've moved icons about
+            this.gridView.calcVisibility();
+
             break;
         }
     }

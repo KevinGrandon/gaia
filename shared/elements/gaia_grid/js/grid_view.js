@@ -242,19 +242,26 @@
     render: function(from, to, useTransform) {
       var self = this;
 
-      this.removeAllPlaceholders();
-      this.cleanItems();
-
       // Start rendering from one before the drop target. If not,
       // we may drop over the divider and miss rendering an icon.
-      from = from - 1 || 0;
+      from = (from > 0) ? from - 1 : 0;
 
-      // Bounds-check the 'to' parameter. Because we remove placeholders
-      // and do clean-up above, there may be fewer items now than when
-      // this was called.
+      // Bounds-check the 'to' parameter.
       if ((!to && to != 0) || (to >= this.items.length)) {
         to = this.items.length - 1;
       }
+
+      // Store the from and to indices as items, as removing placeholders/
+      // cleaning will alter indexes.
+      var fromItem = this.items[from];
+      var toItem = this.items[to];
+
+      this.removeAllPlaceholders();
+      this.cleanItems();
+
+      // Reset the to index until we find it again when iterating over items
+      // below.
+      to = this.items.length - 1;
 
       // Reset offset steps
       this.layout.offsetY = 0;
@@ -296,7 +303,17 @@
           step(lastItem);
         }
 
-        if (idx >= from) {
+        if (item == fromItem) {
+          from = idx;
+        }
+        if (item == toItem) {
+          to = idx;
+        }
+
+        // Check if idx is >= to also - there's a chance that decrementing from
+        // at the beginning of this function means fromItem is a placeholder
+        // or a removed divider.
+        if (idx >= from || idx >= to) {
           item.render([x, y], idx, useTransform);
         }
 

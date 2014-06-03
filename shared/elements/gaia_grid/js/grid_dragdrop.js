@@ -89,8 +89,12 @@
     },
 
     finish: function(e) {
-      this.currentTouch = null;
+      // Remove the dragging property after the icon has transitioned into
+      // place to avoid jank due to animations starting that are disabled
+      // when dragging.
+      this.icon.element.addEventListener('transitionend', this);
 
+      this.currentTouch = null;
       delete this.icon.noTransform;
       this.target.classList.remove('active');
 
@@ -98,11 +102,7 @@
         clearTimeout(this.rearrangeDelay);
         this.doRearrange.call(this);
       } else {
-        for (var i = 0, iLen = this.gridView.items.length; i < iLen; i++) {
-          if (this.gridView.items[i] == this.icon) {
-            this.gridView.render(i, i, true);
-          }
-        }
+        this.gridView.render(this.icon.detail.index, this.icon.detail.index, true);
       }
 
       // Save icon state if we need to
@@ -117,11 +117,6 @@
         this.gridView.start();
         window.dispatchEvent(new CustomEvent('gaiagrid-dragdrop-finish'));
       }.bind(this));
-
-      // Remove the dragging property after the icon has transitioned into
-      // place to avoid jank due to animations starting that are disabled
-      // when dragging.
-      this.icon.element.addEventListener('transitionend', this);
     },
 
     /**
@@ -245,6 +240,11 @@
       document.body.classList.remove('edit-mode');
       document.removeEventListener('visibilitychange', this);
       this.removeDragHandlers();
+
+      if (this.icon) {
+        this.icon.element.removeEventListener('transitionend', this);
+        this.icon = null;
+      }
     },
 
     removeDragHandlers: function() {

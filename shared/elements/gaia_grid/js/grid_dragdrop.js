@@ -2,27 +2,27 @@
 
 (function(exports) {
 
-  const activeScaleAdjust = 0.4;
+  /* The scale to use on icons that are being dragged */
+  const ACTIVE_SCALE = 1.4;
 
   /* This delay is the time passed once users stop the finger over an icon and
    * the rearrange is performed */
-  const rearrangeDelay = 30;
+  const REARRANGE_DELAY = 30;
 
   /* The page is scrolled via javascript if an icon is being moved, and is
    * within a length of a page edge configured by this value */
-  const edgePageThreshold = 50;
+  const EDGE_PAGE_THRESHOLD = 50;
 
-  const screenHeight = window.innerHeight;
+  const SCREEN_HEIGHT = window.innerHeight;
 
-  const scrollStep = Math.round(screenHeight / edgePageThreshold);
+  const SCROLL_STEP = Math.round(SCREEN_HEIGHT / EDGE_PAGE_THRESHOLD);
 
   /* The scroll step will be 10 times bigger over the edge */
-  const maxScrollStepFactor = 10;
+  const MAX_SCROLL_STEP_FACTOR = 10;
 
   function DragDrop(gridView) {
     this.gridView = gridView;
     this.container = gridView.element;
-    this.scrollable = this.container.parentNode;
     this.container.addEventListener('contextmenu', this);
   }
 
@@ -47,17 +47,14 @@
     inEditMode: false,
 
     /**
-     * Returns the maximum active scale value.
-     */
-    get maxActiveScale() {
-      return 1 + activeScaleAdjust;
-    },
-
-    /**
      * Returns true if we are currently dragging an icon.
      */
     get inDragAction() {
       return this.target && this.target.classList.contains('active');
+    },
+
+    get activeScale() {
+      return ACTIVE_SCALE;
     },
 
     /**
@@ -83,27 +80,33 @@
       var items = this.gridView.items;
       var lastElement = items[items.length - 1];
       this.maxScroll = lastElement.y + lastElement.pixelHeight +
-                       (this.icon.pixelHeight * this.maxActiveScale);
+                       (this.icon.pixelHeight * this.ACTIVE_SCALE);
 
       // Make the icon larger
       this.icon.transform(
         e.pageX - this.xAdjust,
-        e.pageY - this.yAdjust + this.scrollable.scrollTop,
-        this.icon.scale + activeScaleAdjust);
+        e.pageY - this.yAdjust + this.container.scrollTop,
+        ACTIVE_SCALE, true);
+
+      // Re-render the grid using transforms to aid with animation
+      this.gridView.render(0, this.gridView.items.length - 1, true);
     },
 
     finish: function(e) {
-      this.currentTouch = null;
+      // Remove the dragging property after the icon has transitioned into
+      // place to avoid jank due to animations starting that are disabled
+      // when dragging.
+      this.icon.element.addEventListener('transitionend', this);
 
+      this.currentTouch = null;
       delete this.icon.noTransform;
-      this.icon = null;
       this.target.classList.remove('active');
 
       if (this.rearrangeDelay !== null) {
         clearTimeout(this.rearrangeDelay);
         this.doRearrange.call(this);
       } else {
-        this.gridView.render();
+        this.gridView.render(this.icon.detail.index, this.icon.detail.index, true);
       }
 
       // Save icon state if we need to
@@ -118,24 +121,22 @@
         this.gridView.start();
         window.dispatchEvent(new CustomEvent('gaiagrid-dragdrop-finish'));
       }.bind(this));
-
-      this.container.classList.remove('dragging');
     },
 
     /**
      * The closer to edge the faster (bigger step).
      ** Distance 0px -> 10 times faster
      ** Distance 25px -> 5 times faster
-     ** Distance 50px (edgePageThreshold) -> 0 times
+     ** Distance 50px (EDGE_PAGE_THRESHOLD) -> 0 times
      */
     getScrollStep: function(distanceToEdge) {
-      var factor = maxScrollStepFactor;
+      var factor = MAX_SCROLL_STEP_FACTOR;
 
       if (distanceToEdge > 0) {
-        factor *= ((edgePageThreshold - distanceToEdge) / edgePageThreshold);
+        factor *= ((EDGE_PAGE_THRESHOLD - distanceToEdge) / EDGE_PAGE_THRESHOLD);
       }
 
-      return Math.round(scrollStep * factor);
+      return Math.round(SCROLL_STEP * factor);
     },
 
     /**
@@ -154,17 +155,17 @@
       function doScroll(amount) {
         /* jshint validthis:true */
         this.isScrolling = true;
-        this.scrollable.scrollTop += amount;
+        this.container.scrollTop += amount;
         exports.requestAnimationFrame(this.scrollIfNeeded.bind(this));
         touch.pageY += amount;
         this.positionIcon(touch.pageX, touch.pageY);
       }
 
-      var docScroll = this.scrollable.scrollTop;
+      var docScroll = this.container.scrollTop;
       var distanceFromTop = Math.abs(touch.pageY - docScroll);
-      if (distanceFromTop > screenHeight - edgePageThreshold) {
+      if (distanceFromTop > SCREEN_HEIGHT - EDGE_PAGE_THRESHOLD) {
         var maxY = this.maxScroll;
-        var scrollStep = this.getScrollStep(screenHeight - distanceFromTop);
+        var scrollStep = this.getScrollStep(SCREEN_HEIGHT - distanceFromTop);
         // We cannot exceed the maximum scroll value
         if (touch.pageY >= maxY || maxY - touch.pageY < scrollStep) {
           this.isScrolling = false;
@@ -172,7 +173,7 @@
         }
 
         doScroll.call(this, scrollStep);
-      } else if (touch.pageY > 0 && distanceFromTop < edgePageThreshold) {
+      } else if (touch.pageY > 0 && distanceFromTop < EDGE_PAGE_THRESHOLD) {
         doScroll.call(this, 0 - this.getScrollStep(distanceFromTop));
       } else {
         this.isScrolling = false;
@@ -191,7 +192,8 @@
       this.icon.transform(
         pageX,
         pageY,
-        this.icon.scale + activeScaleAdjust);
+        ACTIVE_SCALE,
+        true);
 
       // Reposition in the icons array if necessary.
       // Find the icon with the closest X/Y position of the move,
@@ -216,7 +218,7 @@
         clearTimeout(this.rearrangeDelay);
         this.doRearrange = this.rearrange.bind(this, myIndex, foundIndex);
         this.rearrangeDelay = setTimeout(this.doRearrange.bind(this),
-                                         rearrangeDelay);
+                                         REARRANGE_DELAY);
       }
     },
 
@@ -225,8 +227,8 @@
       this.dirty = true;
       this.gridView.items.splice(tIndex, 0,
         this.gridView.items.splice(sIndex, 1)[0]);
-      tIndex < sIndex ? this.gridView.render(tIndex, sIndex) :
-        this.gridView.render(sIndex, tIndex);
+      tIndex < sIndex ? this.gridView.render(tIndex, sIndex, true) :
+        this.gridView.render(sIndex, tIndex, true);
     },
 
     enterEditMode: function() {
@@ -242,6 +244,11 @@
       document.body.classList.remove('edit-mode');
       document.removeEventListener('visibilitychange', this);
       this.removeDragHandlers();
+
+      if (this.icon) {
+        this.icon.element.removeEventListener('transitionend', this);
+        this.icon = null;
+      }
     },
 
     removeDragHandlers: function() {
@@ -266,6 +273,10 @@
             break;
 
           case 'contextmenu':
+            if (this.icon) {
+              return;
+            }
+
             this.target = e.target;
 
             if (!this.target) {
@@ -291,7 +302,7 @@
           case 'touchmove':
             var touch = e.touches[0];
 
-            var pageY = touch.pageY + this.scrollable.scrollTop;
+            var pageY = touch.pageY + this.container.scrollTop;
             this.positionIcon(touch.pageX, pageY);
 
             this.currentTouch = {
@@ -311,6 +322,23 @@
             e.preventDefault();
             this.removeDragHandlers();
             this.finish(e);
+            break;
+
+          case 'transitionend':
+            if (!this.icon) {
+              return;
+            }
+
+            this.container.classList.remove('dragging');
+            this.icon.element.removeEventListener('transitionend', this);
+            this.icon = null;
+
+            // Re-render the grid view without using transforms
+            this.gridView.render(0, this.gridView.items.length - 1);
+
+            // Recalculate visibility as we've moved icons about
+            this.gridView.calcVisibility();
+
             break;
         }
     }

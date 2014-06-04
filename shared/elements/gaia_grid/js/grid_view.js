@@ -3,6 +3,7 @@
 /* global GridDragDrop */
 /* global GridLayout */
 /* global GridZoom */
+/* global Icon */
 /* global Placeholder */
 
 (function(exports) {
@@ -47,6 +48,11 @@
     items: [],
 
     /**
+     * List of all visible displayed app icons in the homescreen.
+     */
+    visibleIcons: [],
+
+    /**
      * Returns a reference to the gaia-grid element.
      */
     get element() {
@@ -67,19 +73,23 @@
 
     start: function() {
       this.element.addEventListener('click', this.clickIcon);
-      window.addEventListener('scroll', this.onScroll);
+      this.element.addEventListener('scroll', this.onScroll);
+      this.calcVisibility();
     },
 
     stop: function() {
       this.element.removeEventListener('click', this.clickIcon);
-      window.removeEventListener('scroll', this.onScroll);
+      this.element.removeEventListener('scroll', this.onScroll);
     },
 
     onScroll: function(e) {
+      this.element.classList.add('scrolling');
       this.element.removeEventListener('click', this.clickIcon);
       clearTimeout(this.preventClickTimeout);
       this.preventClickTimeout = setTimeout(function addClickEvent() {
         this.element.addEventListener('click', this.clickIcon);
+        this.element.classList.remove('scrolling');
+        this.calcVisibility();
       }.bind(this), PREVENT_CLICK_TIMEOUT);
     },
 
@@ -112,6 +122,30 @@
       }
 
       icon[action]();
+    },
+
+    /**
+     * Calculates whether an icon is visible or not and sets a CSS class
+     * accordingly.
+     */
+    calcVisibility: function() {
+      this.visibleIcons.forEach(function(item) {
+        item.element.classList.remove('visible');
+      }, this);
+      this.visibleIcons = [];
+
+      var visibleStart = this.element.scrollTop;
+      var visibleEnd = visibleStart + this.element.clientHeight;
+      var itemHeight = this.layout.gridItemHeight;
+      this.items.forEach(function(item) {
+        if (item instanceof Icon) {
+          if (item.element.offsetTop + itemHeight > visibleStart &&
+              item.element.offsetTop < visibleEnd) {
+            item.element.classList.add('visible');
+            this.visibleIcons.push(item);
+          }
+        }
+      }, this);
     },
 
     /**
@@ -204,8 +238,11 @@
      * Positions app icons and dividers accoriding to available space
      * on the grid.
      * @param {Integer} from The index to start rendering from.
+     * @param {Integer} to The index to continue rendering to.
+     * @param {Boolean} useTransform Whether to use CSS transforms to position
+     * grid items.
      */
-    render: function(from, skipDivider) {
+    render: function(from, to, useTransform, skipDivider) {
       var self = this;
 
       this.removeAllPlaceholders();
@@ -213,11 +250,21 @@
 
       // Start rendering from one before the drop target. If not,
       // we may drop over the divider and miss rendering an icon.
-      from = from - 1 || 0;
+      from = (from > 0) ? from - 1 : 0;
 
-      // TODO This variable should be an argument of this method. See
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1010742#c4
-      var to = this.items.length - 1;
+      // Bounds-check the 'to' parameter.
+      if ((!to && to != 0) || (to >= this.items.length)) {
+        to = this.items.length - 1;
+      }
+
+      // Store the from and to indices as items, as removing placeholders/
+      // cleaning will alter indexes.
+      var fromItem = this.items[from];
+      var toItem = this.items[to];
+
+      // Reset the to index until we find it again when iterating over items
+      // below.
+      to = this.items.length - 1;
 
       // Reset offset steps
       this.layout.offsetY = 0;
@@ -259,8 +306,18 @@
           step(lastItem);
         }
 
-        if (idx >= from) {
-          item.render([x, y], idx);
+        if (item == fromItem) {
+          from = idx;
+        }
+        if (item == toItem) {
+          to = idx;
+        }
+
+        // Check if idx is >= to also - there's a chance that decrementing from
+        // at the beginning of this function means fromItem is a placeholder
+        // or a removed divider.
+        if (idx >= from || idx >= to) {
+          item.render([x, y], idx, useTransform);
         }
 
         // Increment the x-step by the sizing of the item.

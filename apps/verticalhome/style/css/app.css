@@ -10,18 +10,16 @@ html, body {
 
 .scrollable {
   position: absolute;
+  display: flex;
+  flex-direction: column;
   top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
-  height: 100%;
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
-gaia-grid {
-  display: block;
-  height: 100%;
-  width: 100%;
+#icons {
+  flex: 1;
 }
 
 body[data-cols="4"] .icon .title {
@@ -44,4 +42,10 @@ body[data-cols="4"] .icon .title {
 
 #contextmenu-dialog {
   display: none;
+}
+
+/* Copied from gaia_grid/style.css, necessary until bug 1018269 is fixed */
+@keyframes pulse {
+  from { opacity: 1.0; }
+  to { opacity: 0.5; }
 }

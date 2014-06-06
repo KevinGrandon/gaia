@@ -7,7 +7,6 @@
   const HIDDEN_ROLES = ['system', 'input', 'homescreen', 'search'];
 
   function App() {
-    this.scrollable = document.querySelector('.scrollable');
     this.grid = document.getElementById('icons');
     this.homescreenFocused = true;
 
@@ -90,7 +89,7 @@
           }
 
           var step;
-          var scrollable = this.scrollable;
+          var scrollable = this.grid.parentElement;
 
           var doScroll = function() {
             var scrollY = scrollable.scrollTop;

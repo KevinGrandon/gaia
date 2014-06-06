@@ -10,7 +10,7 @@
   };
 
   function StatusBar() {
-    this.scrollable = document.querySelector('.scrollable');
+    this.scrollable = document.querySelector('#scrollable');
     this.threshold = document.getElementById('search').clientHeight;
 
     if (!appManager.app) {

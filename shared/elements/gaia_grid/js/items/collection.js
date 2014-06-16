@@ -28,6 +28,13 @@
     __proto__: GaiaGrid.GridItem.prototype,
 
     /**
+     * Item types which may be dropped on this item.
+     */
+    droppables: [
+      'app'
+    ],
+
+    /**
      * Returns the height in pixels of each icon.
      */
     get pixelHeight() {
@@ -71,6 +78,14 @@
      */
     isRemovable: function() {
       return true;
+    },
+
+    /**
+     * Called when a droppable object is dropped on this collection.
+     * @param {Object} item The item that was droppped on the collection.
+     */
+    ondrop: function(item) {
+      console.log('Got drop!', JSON.stringify(item));
     },
 
     /**

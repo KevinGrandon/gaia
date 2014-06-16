@@ -35,6 +35,14 @@
     target: null,
 
     /**
+     * The current dropObject target.
+     * Populated if we are dragging over an item which contains our item type
+     * within Item.droppables.
+     * @type {Object}
+     */
+    dropObject: null,
+
+    /**
      * If we have moved an icon, this indicates that we need to save the state
      * @type {boolean}
      */
@@ -217,7 +225,20 @@
         }
       }
 
-      if (foundIndex !== this.icon.detail.index) {
+      var thisIconType = this.icon.detail.type;
+      if (foundIndex !== thisIconType) {
+
+        // Check droppable support.
+        // Icons may be dropped on other icons in some cases (icons
+        // on smart collections for example).
+        var overItem = this.gridView.items[foundIndex];
+        if (overItem.droppables &&
+            overItem.droppables.indexOf(thisIconType) !== -1) {
+          this.dropObject = overItem;
+          return;
+        }
+        this.dropObject = null;
+
         clearTimeout(this.rearrangeDelay);
         this.doRearrange = this.rearrange.bind(this, foundIndex);
         this.rearrangeDelay = setTimeout(this.doRearrange.bind(this),
@@ -353,6 +374,10 @@
             e.preventDefault();
             this.removeDragHandlers();
             this.finish(e);
+            if (this.dropObject) {
+              console.log('Doing drop!!');
+              this.dropObject.ondrop();
+            }
             break;
 
           case 'transitionend':

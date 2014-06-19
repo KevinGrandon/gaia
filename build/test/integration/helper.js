@@ -97,7 +97,7 @@ function checkFileContentInZip(zipPath, pathInZip, expectedContent, isJSON) {
 
 function exec(command, callback) {
   var options = {
-    maxBuffer: 400*1024
+    maxBuffer: 600*1024
   };
 
   exec(command, options, callback);

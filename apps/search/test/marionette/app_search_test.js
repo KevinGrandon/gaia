@@ -24,8 +24,14 @@ marionette('Search - App search', function() {
     rocketbar.enterText('calendar');
     search.goToResults();
     var calendarIdentifier = 'app://calendar.gaiamobile.org/manifest.webapp';
-    var result = search.checkAppResult(calendarIdentifier, 'Calendar');
-    result.click();
+    try {
+      var result = search.checkAppResult(calendarIdentifier, 'Calendar');
+      result.click();
+    } catch(e) {
+      console.log('GOT FOUND!');
+      client.switchToFrame();
+      console.log('Screenshot: ' + 'data:image/png;base64,' + client.screenshot());
+    }
     search.goToApp('app://calendar.gaiamobile.org');
   });
 

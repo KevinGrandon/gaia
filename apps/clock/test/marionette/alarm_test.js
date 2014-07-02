@@ -138,7 +138,14 @@ marionette('Alarm', function() {
     alarm.create();
     alarm.remove(0);
     alarm.openNewForm();
-    assert.ok($('.new-alarm-title').displayed());
+
+    $.client.waitFor(function() {
+      var el = $('.new-alarm-title');
+      el.scriptWith(function(el) {
+        el.scrollIntoView(false);
+      });
+      return el.displayed();
+    });
   });
 
   test('Update alarm name and time', function() {

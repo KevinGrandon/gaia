@@ -37,6 +37,7 @@ Rocketbar.prototype = {
     activeBrowserFrame: '#windows .appWindow.active',
     screen: '#screen',
     rocketbar: '#rocketbar',
+    form: '#rocketbar-form',
     title: '#rocketbar-title',
     input: '#rocketbar-input',
     cancel: '#rocketbar-cancel',
@@ -64,10 +65,19 @@ Rocketbar.prototype = {
       return lastVal;
     }.bind(this));
 
-    rocketbar.tap();
-    var input =
-      this.client.findElement(this.selectors.input);
-    this.client.waitFor(input.displayed.bind(input));
+    // Do not try to tap the title if the rocketbar is not expanded
+    try {
+      var title = this.client.findElement(this.selectors.title);
+console.log('Title class:', title.getAttribute('class'));
+      if (title.getAttribute('class').indexOf('hidden') === -1) {
+console.log('DOES NOT HAVE CLASS.');
+        title.tap();
+      }
+    } catch(e) {}
+
+    var form =
+      this.client.helper.waitForElement(this.selectors.form);
+    this.client.waitFor(form.displayed.bind(form));
   },
 
   /**

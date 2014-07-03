@@ -173,7 +173,7 @@
         }
         // Editing a bookmark in edit mode
         action = 'edit';
-      } else {
+      } else if(icon.element) {
         // Add a 'launching' class to the icon to style it with CSS.
         icon.element.classList.add('launching');
 

@@ -33,6 +33,7 @@
       for (var i = 0, iLen = event.target.result.length; i < iLen; i++) {
         this.makeIcons(event.target.result[i]);
       }
+      console.log('MozApps DONE!!!');
     }.bind(this);
 
     /**
@@ -124,6 +125,7 @@
      * Synchronizes our local result set with mozApps.
      */
     synchronize: function() {
+console.log('Synchronize START!!!');
       var storeItems = this.store._allItems;
       var toAdd = [];
 
@@ -138,6 +140,13 @@
 
       for (i = 0, iLen = this.entries.length; i < iLen; i++) {
         var entry = this.entries[i];
+
+console.log('Origin is: ', entry.app.origin)
+if (!entry.app.manifest) {
+  console.log('Manifest is: ', JSON.stringify(entry.app.manifest))
+  console.log('Update Manifest is: ', JSON.stringify(entry.app.updateManifest))
+}
+
         if (!appIconsByManifestUrl[entry.detail.manifestURL] &&
             !entry.app.manifest.entry_points) {
           toAdd.push(entry);

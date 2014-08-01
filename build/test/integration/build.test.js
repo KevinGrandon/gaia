@@ -94,6 +94,12 @@ suite('Build GAIA from differece app list', function() {
       assert.ok(fs.existsSync(initPath),
         'init.json should exist');
 
+      // Verify collection icon paths.
+      var collectionIconPath = path.join(process.cwd(), 'build_stage',
+        'collection', 'collections', 'social', 'icon.png');
+      assert.ok(fs.existsSync(collectionIconPath),
+        'Social icon.png should exist');
+
       // Homescreen1 should have a role of system
       var hsHomZip = new AdmZip(path.join(process.cwd(), 'profile',
         'webapps', 'homescreen.gaiamobile.org', 'application.zip'));

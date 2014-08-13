@@ -36,11 +36,6 @@
       return;
     }
 
-    if (chrome.bar) {
-      this.app.element.classList.add('bar');
-      this.bar.classList.add('visible');
-    }
-
     if (chrome.scrollable) {
       this.app.element.classList.add('scrollable');
       this.app.element.classList.add('light');
@@ -83,17 +78,17 @@
   };
 
   AppChrome.prototype.view = function an_view() {
-    return '<div class="chrome" id="' +
+    return '<div class="chrome maximized" id="' +
             this.CLASS_NAME + this.instanceID + '">' +
             '<div class="progress"></div>' +
-            '<section role="region" class="bar skin-organic">' +
-              '<header>' +
-                '<button class="kill popup-close">' +
-                '<span class="icon icon-close"></span></button>' +
-                '<h1 class="title"></h1>' +
-              '</header>' +
-            '</section>' +
-          '</div>';
+            '<div class="controls">' +
+            '<button class="kill popup-close">' +
+                  '<span class="icon icon-close"></span></button>' +
+            ' </div>' +
+            ' <div class="urlbar">' +
+            '   <div class="title"></div>' +
+            ' </div>' +
+            '</div>';
   };
 
   AppChrome.prototype.overflowMenuView = function an_overflowMenuView() {
@@ -128,18 +123,7 @@
     this.backButton = this.element.querySelector('.back-button');
     this.menuButton = this.element.querySelector('.menu-button');
     this.title = this.element.querySelector('.title');
-
-    this.bar = this.element.querySelector('.bar');
-    if (this.bar) {
-      this.killButton = this.element.querySelector('.kill');
-
-      // We're appending new elements to DOM so to make sure headers are
-      // properly resized and centered, we emmit a lazyload event.
-      // This will be removed when the gaia-header web component lands.
-      window.dispatchEvent(new CustomEvent('lazyload', {
-        detail: this.bar
-      }));
-    }
+    this.killButton = this.element.querySelector('.kill');
   };
 
   AppChrome.prototype.handleEvent = function ac_handleEvent(evt) {

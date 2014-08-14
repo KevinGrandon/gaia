@@ -70,6 +70,12 @@ class GCli(object):
             'screenshot': {
                 'function': self.screenshot,
                 'help': 'Take a screenshot'},
+            'relaunchbrowser': {
+                'function': self.relaunchbrowser,
+                'help': 'Try to relaunch the browser.'},
+            'relaunchcamera': {
+                'function': self.relaunchcamera,
+                'help': 'Try to relaunch the camera.'},
             'sendsms': {
                 'function': self.send_sms,
                 'args': [
@@ -209,6 +215,14 @@ class GCli(object):
     def screenshot(self, args):
         self.marionette.execute_script(
             "window.wrappedJSObject.dispatchEvent(new Event('home+sleep'));")
+
+    def relaunchbrowser(self, args):
+        self.marionette.execute_script(
+            "window.wrappedJSObject.document.querySelector('[data-manifest-name=\"Browser\"]').dispatchEvent(new CustomEvent('_closed'));")
+
+    def relaunchcamera(self, args):
+        self.marionette.execute_script(
+            "window.wrappedJSObject.document.querySelector('[data-manifest-name=\"Camera\"]').dispatchEvent(new CustomEvent('_closed'));")
 
     def send_sms(self, args):
         self.data_layer.send_sms(args.number, args.message)

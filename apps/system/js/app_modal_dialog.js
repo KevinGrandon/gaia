@@ -120,76 +120,58 @@
   AppModalDialog.prototype.view = function amd_view() {
     return '<div class="modal-dialog"' +
             ' id="' + this.CLASS_NAME + this.instanceID + '">' +
-            '<form class="modal-dialog-alert generic-dialog" ' +
-            'role="dialog" tabindex="-1">' +
-            '<div class="modal-dialog-message-container inner">' +
-              '<h3 class="modal-dialog-alert-title"></h3>' +
-              '<p>' +
-                '<span class="modal-dialog-alert-message"></span>' +
-              '</p>' +
-            '</div>' +
+            '<gaia-confirm class="modal-dialog-alert">' +
+            '<h1 class="modal-dialog-alert-title"></h1>' +
+            '<p class="modal-dialog-alert-message"></p>' +
             '<menu>' +
               '<button class="modal-dialog-alert-ok confirm affirmative" ' +
               'data-l10n-id="ok">OK</button>' +
             '</menu>' +
-          '</form>' +
-          '<form class="modal-dialog-confirm generic-dialog" ' +
+          '</gaia-confirm>' +
+          '<gaia-confirm class="modal-dialog-confirm" ' +
           'role="dialog" tabindex="-1">' +
-            '<div class="modal-dialog-message-container inner">' +
-              '<h3 class="modal-dialog-confirm-title"></h3>' +
-              '<p>' +
-                '<span class="modal-dialog-confirm-message"></span>' +
-              '</p>' +
-            '</div>' +
+            '<h1 class="modal-dialog-confirm-title"></h1>' +
+            '<p class="modal-dialog-confirm-message"></p>' +
             '<menu data-items="2">' +
               '<button class="modal-dialog-confirm-cancel cancel" ' +
               'data-l10n-id="cancel">Cancel</button>' +
               '<button class="modal-dialog-confirm-ok confirm affirmative" ' +
               'data-l10n-id="ok">OK</button>' +
             '</menu>' +
-          '</form>' +
-          '<form class="modal-dialog-prompt generic-dialog" ' +
-            'role="dialog" tabindex="-1">' +
-            '<div class="modal-dialog-message-container inner">' +
-              '<h3 class="modal-dialog-prompt-title"></h3>' +
-              '<p>' +
-                '<span class="modal-dialog-prompt-message"></span>' +
-                '<input class="modal-dialog-prompt-input" />' +
-              '</p>' +
-            '</div>' +
+          '</gaia-confirm>' +
+          '<gaia-confirm class="modal-dialog-prompt">' +
+            '<h1 class="modal-dialog-prompt-title"></h1>' +
+            '<p>' +
+              '<span class="modal-dialog-prompt-message"></span>' +
+              '<input class="modal-dialog-prompt-input" />' +
+            '</p>' +
             '<menu data-items="2">' +
               '<button class="modal-dialog-prompt-cancel cancel"' +
               ' data-l10n-id="cancel">Cancel</button>' +
               '<button class="modal-dialog-prompt-ok confirm affirmative" ' +
               'data-l10n-id="ok">OK</button>' +
             '</menu>' +
-          '</form>' +
-          '<form class="modal-dialog-select-one generic-dialog" ' +
-            'role="dialog" ' +
-            'tabindex="-1">' +
-            '<div class="modal-dialog-message-container inner">' +
-              '<h3 class="modal-dialog-select-one-title"></h3>' +
-              '<ul class="modal-dialog-select-one-menu"></ul>' +
-            '</div>' +
+          '</gaia-confirm>' +
+          '<gaia-confirm class="modal-dialog-select-one">' +
+            '<h1 class="modal-dialog-select-one-title"></h1>' +
+            '<p><ul class="modal-dialog-select-one-menu"></ul></p>' +
             '<menu>' +
               '<button class="modal-dialog-select-one-cancel cancel" ' +
               'data-l10n-id="cancel">Cancel</button>' +
             '</menu>' +
-          '</form>' +
-          '<form class="modal-dialog-custom-prompt generic-dialog" ' +
-            'role="dialog" ' +
-            'tabindex="-1">' +
-            '<div class="modal-dialog-message-container inner">' +
-              '<h3 class="modal-dialog-custom-prompt-title"></h3>' +
-              '<p class="modal-dialog-custom-prompt-message"></p>' +
-              '<label class="pack-checkbox">' +
-                '<input class="modal-dialog-custom-prompt-checkbox" ' +
-                'type="checkbox"/>' +
-                '<span></span>' +
-              '</label>' +
-            '</div>' +
+          '</gaia-confirm>' +
+          '<gaia-confirm class="modal-dialog-custom-prompt">' +
+            '<h1 class="modal-dialog-custom-prompt-title"></h1>' +
+            '<p>' +
+            '<span class="modal-dialog-custom-prompt-message"></span>' +
+            '<label class="pack-checkbox">' +
+              '<input class="modal-dialog-custom-prompt-checkbox" ' +
+              'type="checkbox"/>' +
+              '<span></span>' +
+            '</label>' +
             '<menu class="modal-dialog-custom-prompt-buttons"></menu>' +
-          '</form>' +
+            '</p>' +
+          '</gaia-confirm>' +
         '</div>';
   };
 

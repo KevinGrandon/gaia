@@ -181,10 +181,25 @@ BrowserMigrator.prototype = {
     });
   },
 
+  /**
+   * Manually set the previous visits array of timestamps.
+   */
+  _setVisits: function(url, visits) {
+    var places = new Places();
+    return places
+      .start()
+      .editPlace(url, (place, cb) => {
+        place.visits = place.visits || [];
+        place.visits.concat(visits);
+        place.visits.sort((a, b) => { return b - a; });
+        cb(place);
+      });
+  },
+
   _saveVisits: function(visits) {
 
+    var self = this;
     var urls = Object.keys(visits);
-    var places = new Places();
 
     return new Promise(function(resolve) {
 
@@ -196,10 +211,10 @@ BrowserMigrator.prototype = {
         }
 
         var url = urls.shift();
-        places.setVisits(url, visits[url].visits).then(saveVisit);
+        self.setVisits(url, visits[url].visits).then(saveVisit);
       }
 
-      places.start().then(saveVisit);
+      saveVisit();
     });
   },
 

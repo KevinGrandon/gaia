@@ -99,14 +99,14 @@
       }
 
       switch (evt.type) {
-      case 'apptitlechange':
-        this.setPlaceTitle(app.config.url, app.title);
-        break;
       case 'applocationchange':
-        this.addVisit(app.config.url);
+        this.onLocationChange(app.config.url);
+        break;
+      case 'apptitlechange':
+        this.onTitleChange(app.config.url, app.title);
         break;
       case 'appiconchange':
-        this.addPlaceIcons(app.config.url, app.favicons);
+        this.onIconChange(app.config.url, app.favicons);
         break;
       case 'apploaded':
         var index = this.screenshotQueue.indexOf(app.config.url);
@@ -114,6 +114,22 @@
           this.screenshotRequested(app.config.url);
           this.screenshotQueue.splice(index, 1);
         }
+
+        var edits = this._currentPlaceEdits;
+        this.editPlace(this._currentPlaceUrl, (place, cb) => {
+          place.title = edits.title;
+          place.visited = edits.visited;
+          place.frecency += edits.frecency;
+
+          for (var iconUri in edits.icons) {
+            place.icons[iconUri] = edits.icons[iconUri];
+          }
+
+          place = this.addToVisited(place);
+          this.checkTopSites(place);
+          cb(place);
+        });
+
         break;
       }
     },
@@ -182,39 +198,6 @@
             });
           });
         });
-      });
-    },
-
-    /**
-     * Add visit.
-     *
-     * Record visit to place. Currently this just increments frecency, but
-     * eventually there should be a separate 'visits' DataStore to store a
-     * record for every visit in order to render a history view.
-     *
-     * @param {String} url URL of visit to record.
-     * @memberof Places.prototype
-     */
-    addVisit: function(url) {
-      return this.editPlace(url, (place, cb) => {
-        place.visited = Date.now();
-        place.frecency++;
-        place = this.addToVisited(place);
-        this.checkTopSites(place);
-        cb(place);
-      });
-    },
-
-    /**
-     * Manually set the previous visits array of timestamps, used for
-     * migrations
-     */
-    setVisits: function(url, visits) {
-      return this.editPlace(url, (place, cb) => {
-        place.visits = place.visits || [];
-        place.visits.concat(visits);
-        place.visits.sort((a, b) => { return b - a; });
-        cb(place);
       });
     },
 
@@ -287,17 +270,31 @@
     },
 
     /**
+     * Add visit.
+     *
+     * Updates our place cache. Currently this just increments frecency, but
+     * eventually there should be a separate 'visits' DataStore to store a
+     * record for every visit in order to render a history view.
+     *
+     * @param {String} url URL of visit to record.
+     * @memberof Places.prototype
+     */
+    onLocationChange: function(url) {
+      this._currentPlaceUrl = url;
+      this._currentPlaceEdits = this.defaultPlace();
+      this._currentPlaceEdits.visited = Date.now();
+      this._currentPlaceEdits.frecency = 1;
+    },
+
+    /**
      * Set place title.
      *
      * @param {String} url URL of place to update.
      * @param {String} title Title of place to set.
      * @memberof Places.prototype
      */
-    setPlaceTitle: function(url, title) {
-      return this.editPlace(url, function(place, cb) {
-        place.title = title;
-        cb(place);
-      });
+    onTitleChange: function(url, title) {
+      this._currentPlaceEdits.title = title;
     },
 
     /**
@@ -307,13 +304,10 @@
      * @param {String} icon The icon object
      * @memberof Places.prototype
      */
-    addPlaceIcons: function(url, icons) {
-      return this.editPlace(url, (place, cb) => {
-        for (var iconUri in icons) {
-          place.icons[iconUri] = icons[iconUri];
-        }
-        cb(place);
-      });
+    onIconChange: function(url, icons) {
+      for (var iconUri in icons) {
+        this._currentPlaceEdits.icons[iconUri] = icons[iconUri];
+      }
     }
   };
 

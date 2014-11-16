@@ -100,6 +100,11 @@
       this.browser_config.isHomescreen = true;
       this.config = this.browser_config;
       this.isHomescreen = true;
+
+      this.config.chrome = {
+        'maximized': true,
+        'scrollable': true
+      };
     };
 
   HomescreenWindow.REGISTERED_EVENTS =

@@ -56,10 +56,6 @@ gaia-grid {
   transition: opacity 0.5s ease-in;
 }
 
-.edit-mode #search {
-  visibility: hidden;
-}
-
 #confirmation-message {
   z-index: 10;
 }

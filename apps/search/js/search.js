@@ -145,7 +145,6 @@
       var providers = this.providers;
 
       this.changeTimeout = setTimeout(() => {
-        this.clear();
         this.dedupe.reset();
 
         Object.keys(providers).forEach((providerKey) => {
@@ -174,6 +173,8 @@
 
               this.collect(provider, results);
             }).catch((err) => {
+              console.log('error during search', err);
+              provider.clear();
               if (provider.remote) {
                 this.loadingElement.classList.remove('loading');
               }

@@ -487,7 +487,7 @@
         }
 
         if (item.detail.type === 'app') {
-          this.logGridItem(item, this.layout.gridItemWidth / 2);
+          //this.logGridItem(item, this.layout.gridItemWidth / 2);
         }
 
         // Increment the x-step by the sizing of the item.

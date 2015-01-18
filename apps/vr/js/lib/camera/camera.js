@@ -392,10 +392,11 @@ Camera.prototype.onFacesDetected = function(faces) {
 /**
  * Plugs Video Stream into Video Element.
  *
- * @param  {Elmement} videoElement
+ * @param  {Elmement} primaryVideoElement
+ * @param  {Elmement} secondaryVideoElement
  * @public
  */
-Camera.prototype.loadStreamInto = function(videoElement) {
+Camera.prototype.loadStreamInto = function(primaryVideoElement, secondaryVideoElement) {
   debug('loading stream into element');
   if (!this.mozCamera) {
     debug('error - `mozCamera` is undefined or null');
@@ -404,17 +405,21 @@ Camera.prototype.loadStreamInto = function(videoElement) {
 
   // REVIEW: Something is wrong if we are
   // calling this without a video element.
-  if (!videoElement) {
-    debug('error - `videoElement` is undefined or null');
+  if (!primaryVideoElement) {
+    debug('error - `primaryVideoElement` is undefined or null');
     return;
   }
 
   // Don't load the same camera stream again
-  var isCurrent = videoElement.mozSrcObject === this.mozCamera;
+  var isCurrent = primaryVideoElement.mozSrcObject === this.mozCamera;
   if (isCurrent) { return debug('camera didn\'t change'); }
 
-  videoElement.mozSrcObject = this.mozCamera;
-  videoElement.play();
+  primaryVideoElement.mozSrcObject = this.mozCamera;
+  primaryVideoElement.play();
+
+  secondaryVideoElement.mozSrcObject = this.mozCamera;
+  secondaryVideoElement.play();
+
   debug('stream loaded into video');
 };
 

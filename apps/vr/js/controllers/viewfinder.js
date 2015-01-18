@@ -258,7 +258,8 @@ ViewfinderController.prototype.calculateFaceCircle = function(face) {
  * @private
  */
 ViewfinderController.prototype.loadStream = function() {
-  this.camera.loadStreamInto(this.views.viewfinder.els.video);
+  this.camera.loadStreamInto(
+    this.views.viewfinder.els.video1, this.views.viewfinder.els.video2);
   debug('stream started');
 };
 

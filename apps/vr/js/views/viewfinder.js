@@ -37,7 +37,8 @@ module.exports = View.extend({
   render: function() {
     this.el.innerHTML = this.template();
     this.els.frame = this.find('.js-frame');
-    this.els.video = this.find('.js-video');
+    this.els.video1 = this.find('.js-video1');
+    this.els.video2 = this.find('.js-video2');
     this.els.videoContainer = this.find('.js-video-container');
 
     // Clean up
@@ -143,12 +144,14 @@ module.exports = View.extend({
    */
   setZoomPreviewAdjustment: function(zoomPreviewAdjustment) {
     if (this._useZoomPreviewAdjustment) {
-      this.els.video.style.transform = 'scale(' + zoomPreviewAdjustment + ')';
+      this.els.video1.style.transform = 'scale(' + zoomPreviewAdjustment + ')';
+      this.els.video2.style.transform = 'scale(' + zoomPreviewAdjustment + ')';
     }
   },
 
   stopStream: function() {
-    this.els.video.mozSrcObject = null;
+    this.els.video1.mozSrcObject = null;
+    this.els.video2.mozSrcObject = null;
   },
 
   fadeOut: function(done) {
@@ -285,7 +288,8 @@ module.exports = View.extend({
   template: function() {
     return '<div class="viewfinder-frame js-frame">' +
         '<div class="viewfinder-video-container js-video-container">' +
-          '<video class="viewfinder-video js-video"></video>' +
+          '<video class="viewfinder-video js-video1"></video>' +
+          '<video class="viewfinder-video js-video2"></video>' +
         '</div>' +
         '<div class="viewfinder-grid">' +
           '<div class="row"></div>' +

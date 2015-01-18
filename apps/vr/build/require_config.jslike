@@ -2,7 +2,7 @@
   appDir: '..',
   baseUrl: 'js',
   mainConfigFile: '../js/config/require.js',
-  dir: '../../../build_stage/camera',
+  dir: '../../../build_stage/vr',
   insertRequire: ['main'],
   name: 'main',
   include: [

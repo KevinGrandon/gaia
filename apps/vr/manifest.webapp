@@ -5,6 +5,7 @@
   "launch_path": "/index.html",
   "orientation": "default",
   "fullscreen": true,
+  "role": "homescreen",
   "developer": {
     "name": "The Gaia Team",
     "url": "https://github.com/mozilla-b2g/gaia"

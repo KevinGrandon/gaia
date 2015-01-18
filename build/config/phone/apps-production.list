@@ -30,6 +30,7 @@ apps/sms
 apps/system
 apps/verticalhome
 apps/video
+apps/vr
 apps/wallpaper
 apps/wappush
 outoftree_apps/*

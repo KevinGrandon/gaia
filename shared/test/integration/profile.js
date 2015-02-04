@@ -4,7 +4,7 @@
 module.exports = {
   settings: {
     'cdn.url': 'http://localhost',
-    'everythingme.api.url': null,
+    'appsearch.url': null,
     'search.marketplace.url': null
   },
   prefs: {

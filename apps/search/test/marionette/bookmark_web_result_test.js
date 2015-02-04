@@ -45,7 +45,7 @@ marionette('Bookmark Web Result', function() {
     var chrome = client.scope({ context: 'chrome' });
     chrome.executeAsyncScript(function(url) {
       var req = navigator.mozSettings.createLock().set({
-        'everythingme.api.url': url
+        'appsearch.url': url
       });
       req.onsuccess = function() {
         marionetteScriptFinished();

@@ -45,6 +45,15 @@
         'url': url
       });
     },
+
+    /**
+     * Requests that the system app opens a new private window.
+     */
+    requestPrivateWindow: function() {
+      this._port.postMessage({
+        'action': 'private-window'
+      });
+    },
   };
 
   exports.newtab = new Newtab();

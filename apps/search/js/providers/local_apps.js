@@ -4,6 +4,10 @@
 
   'use strict';
 
+  const HIDDEN_ROLES = [
+    'system', 'input', 'homescreen', 'search', 'theme', 'addon', 'langpack'
+  ];
+
   function LocalApps() {
     this.apps = {};
     this.appListing = [];
@@ -13,7 +17,14 @@
     var self = this;
 
     mozApps.oninstall = function oninstall(e) {
-      self.apps[e.application.manifestURL] = e.application;
+      var app = e.application;
+      var manifest = app.manifest || app.updateManifest;
+
+      if (HIDDEN_ROLES.indexOf(manifest.role) !== -1) {
+        return;
+      }
+
+      self.apps[e.application.manifestURL] = app;
       self.createAppListing();
     };
 
@@ -63,10 +74,6 @@
         var app = this.apps[manifestURL];
         var manifest = app.manifest || app.updateManifest;
 
-        var HIDDEN_ROLES = [
-          'system', 'input', 'homescreen', 'search', 'theme', 'addon',
-          'langpack'
-        ];
         if (HIDDEN_ROLES.indexOf(manifest.role) !== -1) {
           return;
         }

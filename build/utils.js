@@ -9,6 +9,7 @@ const FILE_TYPE_FILE = 0;
 const FILE_TYPE_DIRECTORY = 1;
 
 var utils;
+
 if (isNode()) {
   utils = require('./utils-node.js');
 } else {

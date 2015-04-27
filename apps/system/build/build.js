@@ -6,6 +6,28 @@ var utils = require('utils');
 var SystemAppBuilder = function() {
 };
 
+SystemAppBuilder.prototype.babel = function(options) {
+  var babelFiles = [
+    'js/base_module.js'
+  ];
+
+  var babel = new utils.Commander('./node_modules/.bin/babel');
+  babel.initPath(utils.getEnvPath());
+
+  function processFile() {
+    /* jshint validthis: true */
+    if (!babelFiles.length) {
+      return;
+    }
+
+    var eachFile = babelFiles.shift();
+    var babelCmd = options.APP_DIR + eachFile + ' > ' +
+      this.stageDir.path + eachFile;
+    babel.run(babelCmd, processFile);
+  }
+  processFile();
+};
+
 // set options
 SystemAppBuilder.prototype.setOptions = function(options) {
   this.stageDir = utils.getFile(options.STAGE_APP_DIR);
@@ -118,6 +140,7 @@ SystemAppBuilder.prototype.inlineDeviceType = function(options) {
 SystemAppBuilder.prototype.execute = function(options) {
   utils.copyToStage(options);
   this.setOptions(options);
+  this.babel(options);
   this.initConfigJsons();
   if (this.distDirPath) {
     this.addCustomizeFiles();
